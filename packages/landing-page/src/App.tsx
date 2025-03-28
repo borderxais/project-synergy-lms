@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { GraduationCap, Users, School, ChevronRight, Star, HandshakeIcon, Heart, Lightbulb, Compass, BarChart3, Sparkles, TrendingUp, Brain } from 'lucide-react';
+import  { useState, useEffect } from 'react';
+import { Routes, Route,  useNavigate } from 'react-router-dom';
+import { ChevronRight, Star, HandshakeIcon, Heart, Lightbulb, Compass, BarChart3, Sparkles, TrendingUp, Brain } from 'lucide-react';
 
 
 const slides = [
