@@ -1,0 +1,49 @@
+.celebration-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 16px;
+  background: #ffd700;
+  top: 0;
+  opacity: 0;
+  left: var(--position);
+  transform: rotate(var(--rotation));
+  animation: confetti 3s ease-in-out var(--delay) forwards;
+}
+
+.confetti-piece:nth-child(3n) {
+  background: #00ff00;
+}
+
+.confetti-piece:nth-child(3n + 1) {
+  background: #ff0000;
+}
+
+@keyframes confetti {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--rotation));
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(calc(var(--rotation) + 720deg));
+  }
+}
