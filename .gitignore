@@ -23,16 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Python
-__pycache__/
-*.py[cod]
-*.class
-.env
-
-# Sensitive files
+.turbo/*
 db/serviceAccountKey.json
-services/llm/src/.env
-
-# IDE files
-.history/
 
