@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TeacherHeader } from '../../components/TeacherHeader';
-import { Sidebar } from '../teachers/Sidebar';
+import { course_sidebar } from './course_sidebar';
 import { NavigationTabs } from '../../components/NavigationTabs';
 
 // Placeholder components for each tab section
@@ -73,7 +73,7 @@ export default function CourseManagementPage() {
             {activeTab === 'grades' && <Grades />}
           </div>
 
-          <Sidebar />
+          {course_sidebar()}
         </div>
       </div>
     </div>
