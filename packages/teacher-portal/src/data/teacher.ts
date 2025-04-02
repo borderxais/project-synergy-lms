@@ -1,4 +1,24 @@
 import { Assignment, Student, TeachingInsight, Message } from '../types/teacher';
+import { Course } from '../types/teacher';
+
+export const courses: Course[] = [
+  {
+    id: 'course-1',
+    name: '数学（一）',
+    studentCount: 35,
+  },
+  {
+    id: 'course-2',
+    name: '英语（二）',
+    studentCount: 30,
+  },
+  {
+    id: 'course-3',
+    name: '物理（三）',
+    studentCount: 28,
+  }
+];
+
 
 export const assignments: Assignment[] = [
   {

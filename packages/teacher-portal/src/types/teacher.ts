@@ -26,6 +26,13 @@ export interface TeachingInsight {
   impact: 'high' | 'medium' | 'low';
 }
 
+export interface Course {
+  id: string;
+  name: string;
+  studentCount: number;
+}
+
+
 export interface QuickAction {
   icon: LucideIcon;
   label: string;

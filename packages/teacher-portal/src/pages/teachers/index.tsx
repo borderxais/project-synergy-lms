@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { TeacherHeader } from '../../components/TeacherHeader';
 import { NavigationTabs } from '../../components/NavigationTabs';
-import { AssignmentList } from './AssignmentList';
+import { ClassesList } from './ClassesList';
 import { StudentList } from './StudentList';
 import { InsightList } from './InsightList';
 import { Sidebar } from './Sidebar';
 
 const tabs = [
-  { id: 'assignments', label: '作业管理' },
+  { id: 'classes', label: '课程管理' },
   { id: 'students', label: '学生状态' },
   { id: 'insights', label: '教学洞察' }
 ];
 
 export default function TeacherDashboard() {
-  const [activeTab, setActiveTab] = useState('assignments');
+  const [activeTab, setActiveTab] = useState('classes');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -31,7 +31,7 @@ export default function TeacherDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            {activeTab === 'assignments' && <AssignmentList />}
+            {activeTab === 'classes' && <ClassesList />}
             {activeTab === 'students' && <StudentList />}
             {activeTab === 'insights' && <InsightList />}
           </div>
