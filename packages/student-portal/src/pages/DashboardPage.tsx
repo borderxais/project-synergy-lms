@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthContext } from '../components/auth/AuthContext';
 import { Tab } from '@headlessui/react';
 import StudentOverview from '../components/dashboard/StudentOverview';
@@ -8,6 +8,104 @@ import Achievements from '../components/dashboard/Achievements';
 import Roadmap from '../components/dashboard/Roadmap';
 import { Student } from '../types/student';
 import { Menu } from '@headlessui/react';
+import { Course } from '../types/dashboard';
+
+// Mock achievement data for display purposes
+const MOCK_ACHIEVEMENTS = [
+  // Research & Publications
+  {
+    title: "Machine Learning Research Project",
+    description: "Conducted research on applying ML algorithms to predict student performance",
+    date: "2024-12-15",
+    type: "research",
+    tags: ["Machine Learning", "Education", "Data Science"]
+  },
+  {
+    title: "Publication in School Journal",
+    description: "Published article on environmental sustainability in the school's science journal",
+    date: "2024-10-05",
+    type: "publication",
+    tags: ["Environment", "Sustainability"]
+  },
+  
+  // Academic Excellence
+  {
+    title: "AP Computer Science A",
+    description: "Completed AP Computer Science with distinction",
+    date: "2024-05-20",
+    type: "academic",
+    grade: "A+"
+  },
+  {
+    title: "Mathematics Competition Finalist",
+    description: "Reached the finals in the state mathematics competition",
+    date: "2024-03-10",
+    type: "academic",
+    grade: "A"
+  },
+  
+  // Awards & Recognition
+  {
+    title: "Outstanding Student Award",
+    description: "Recognized for exceptional academic performance and leadership",
+    date: "2024-06-15",
+    type: "award",
+    level: "Regional",
+    tags: ["Leadership", "Academic Excellence"]
+  },
+  {
+    title: "Science Fair Gold Medal",
+    description: "Won first place for innovative project on renewable energy",
+    date: "2024-02-28",
+    type: "recognition",
+    level: "National",
+    tags: ["Science", "Innovation", "Renewable Energy"]
+  }
+];
+
+// Mock courses data for display purposes
+const MOCK_COURSES: Course[] = [
+  {
+    id: '1',
+    name: 'Advanced Fencing Techniques',
+    instructor: 'Coach Smith',
+    progress: 65,
+    nextAssignment: {
+      title: 'Footwork Analysis Video',
+      dueDate: '2025-04-10',
+    },
+  },
+  {
+    id: '2',
+    name: 'College English 101',
+    instructor: 'Prof. Johnson',
+    progress: 42,
+    nextAssignment: {
+      title: 'Essay: Modern Literature',
+      dueDate: '2025-04-08',
+    },
+  },
+  {
+    id: '3',
+    name: 'AP Calculus',
+    instructor: 'Ms. Garcia',
+    progress: 78,
+    nextAssignment: {
+      title: 'Problem Set 7',
+      dueDate: '2025-04-07',
+    },
+  },
+  {
+    id: '4',
+    name: 'World History',
+    instructor: 'Dr. Lee',
+    progress: 91,
+    nextAssignment: {
+      title: 'Research Project',
+      dueDate: '2025-04-15',
+    },
+  },
+];
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -149,7 +247,7 @@ const DashboardPage: React.FC = () => {
             }
           })),
 
-          achievements: [],
+          achievements: MOCK_ACHIEVEMENTS,
           roadmap: transformTasks(locationUserData.tasks || [])
         };
 
@@ -207,8 +305,22 @@ const DashboardPage: React.FC = () => {
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-            
+            <div className="flex items-center space-x-4">
+              <Link 
+                to="/home-dashboard" 
+                state={{
+                  userData: location.state?.userData,
+                  dataTimestamp: location.state?.dataTimestamp
+                }}
+                className="flex items-center text-blue-600 hover:text-blue-800 font-medium"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
+                Back to Home Dashboard
+              </Link>
+              <h1 className="text-2xl font-semibold text-gray-900">College Dashboard</h1>
+            </div>
             <Menu as="div" className="relative">
               <Menu.Button className="flex items-center">
                 <div className="h-9 w-9 rounded-full bg-blue-600 flex items-center justify-center">
@@ -293,6 +405,7 @@ const DashboardPage: React.FC = () => {
             <Tab.Panel>
               <StudentOverview 
                 student={studentData} 
+                courses={MOCK_COURSES} 
                 onUpdate={handleUpdateStudentData} 
               />
             </Tab.Panel>

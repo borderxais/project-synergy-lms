@@ -97,7 +97,7 @@ export const DataRetrievalPage: React.FC = () => {
         lastUpdated: new Date().toISOString()
       });
 
-      navigate('/dashboard', {
+      navigate('/home-dashboard', {
         replace: true,
         state: {
           userData: transformedData,

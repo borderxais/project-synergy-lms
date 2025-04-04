@@ -1,0 +1,7 @@
+fastapi>=0.111.0
+uvicorn==0.23.2
+firebase-admin==6.2.0
+python-dotenv==1.0.0
+letta-client
+pydantic>=2.10.6
+mcp>=0.1.0
