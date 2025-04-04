@@ -36,7 +36,7 @@ const Achievements: React.FC<AchievementsProps> = ({ student, onUpdate }) => {
         <div className="space-y-4">
           {researchAchievements.length > 0 ? (
             researchAchievements.map((achievement, idx) => (
-              <div key={`${achievement.title}-${idx}`} className="bg-gray-50 p-4 rounded-lg">
+              <div key={`${achievement.title}-${idx}`} className="bg-gray-100 p-4 rounded-lg">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-medium">{achievement.title}</h3>
@@ -74,7 +74,7 @@ const Achievements: React.FC<AchievementsProps> = ({ student, onUpdate }) => {
         <div className="space-y-4">
           {academicAchievements.length > 0 ? (
             academicAchievements.map((achievement, idx) => (
-              <div key={`${achievement.title}-${idx}`} className="bg-gray-50 p-4 rounded-lg">
+              <div key={`${achievement.title}-${idx}`} className="bg-gray-100 p-4 rounded-lg">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-medium">{achievement.title}</h3>
@@ -107,7 +107,7 @@ const Achievements: React.FC<AchievementsProps> = ({ student, onUpdate }) => {
         <div className="space-y-4">
           {awardAchievements.length > 0 ? (
             awardAchievements.map((achievement, idx) => (
-              <div key={`${achievement.title}-${idx}`} className="bg-gray-50 p-4 rounded-lg">
+              <div key={`${achievement.title}-${idx}`} className="bg-gray-100 p-4 rounded-lg">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-medium">{achievement.title}</h3>
