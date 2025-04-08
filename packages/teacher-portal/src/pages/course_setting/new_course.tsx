@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TeacherHeader } from '../../components/TeacherHeader';
-import { course_sidebar } from './course_sidebar';
+import { Sidebar } from '../teachers/Sidebar';
+import { useParams } from 'react-router-dom';
 
 export default function CreateCoursePage() {
   const [title, setTitle] = useState('');
@@ -99,7 +100,7 @@ export default function CreateCoursePage() {
             </form>
           </div>
 
-          {course_sidebar()}
+          <Sidebar />
         </div>
       </div>
     </div>

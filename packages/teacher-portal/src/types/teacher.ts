@@ -17,13 +17,17 @@ export interface Student {
   attendance: number;
   participation: number;
   recentPerformance: 'improving' | 'stable' | 'declining';
+  total?: number; // add this line
 }
+
 
 export interface TeachingInsight {
   id: string;
   type: 'improvement' | 'warning' | 'suggestion';
   content: string;
   impact: 'high' | 'medium' | 'low';
+  reason: string;
+  suggestedAction: string;
 }
 
 export interface Course {

@@ -6,6 +6,7 @@ import { StudentList } from './StudentList';
 import { InsightList } from './InsightList';
 import { Sidebar } from './Sidebar';
 
+
 const tabs = [
   { id: 'classes', label: '课程管理' },
   { id: 'students', label: '学生状态' },

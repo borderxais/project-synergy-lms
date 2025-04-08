@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TeacherHeader } from '../../components/TeacherHeader';
 import { format, startOfWeek, differenceInCalendarWeeks } from 'date-fns';
 import { course_sidebar } from './course_sidebar';
+import { Sidebar } from '../teachers/Sidebar';
 
 type ScheduleItem = {
   id: number;
@@ -231,7 +232,7 @@ export default function CourseSchedulePage() {
             )}
           </div>
 
-          {course_sidebar() }
+          <Sidebar />
         </div>
       </div>
     </div>

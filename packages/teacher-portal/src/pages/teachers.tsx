@@ -7,5 +7,5 @@ import CourseManagementPage from './course_setting/course_management';
 import CourseSchedulePage from './course_setting/course_schedule';
 
 export default function TeachersPage() {
-  return <CourseSchedulePage />;
+  return <TeacherDashboard />;
 }

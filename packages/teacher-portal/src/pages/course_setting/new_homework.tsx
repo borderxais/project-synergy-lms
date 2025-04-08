@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TeacherHeader } from '../../components/TeacherHeader';
-import { course_sidebar } from './course_sidebar';
+import { Sidebar } from '../teachers/Sidebar';
 
 export default function HomeworkPage() {
   const [name, setName] = useState('');
@@ -108,7 +108,7 @@ export default function HomeworkPage() {
             </div>
           </div>
 
-          {course_sidebar()}
+          <Sidebar />
         </div>
       </div>
     </div>
