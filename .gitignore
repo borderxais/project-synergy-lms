@@ -36,3 +36,4 @@ services/llm/src/.env
 # IDE files
 .history/
 
+services/letta/src/config/serviceAccountKey.json

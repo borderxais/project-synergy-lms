@@ -14,7 +14,10 @@ load_dotenv()
 # Initialize OpenAI client
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
-    raise ValueError("OpenAI API key not found in environment variables")
+    print("[STARTUP] OpenAI API key not found in environment variables")
+    raise ValueError("OpenAI API key not found in environment vasriables")
+else:
+    print(f"OpenAI API key found: {openai_api_key[:4]}...{openai_api_key[-4:]}")
 
 logger.info("[STARTUP] OpenAI API key found")
 logger.info(f"[STARTUP] Key preview: {openai_api_key[:4]}...{openai_api_key[-4:]}")
@@ -25,8 +28,10 @@ try:
         timeout=30.0
     )
     logger.info("[STARTUP] OpenAI client initialized successfully")
+    print("[STARTUP] OpenAI client initialized successfully")
 except Exception as e:
     logger.error(f"[STARTUP] Failed to initialize OpenAI client: {str(e)}")
+    print(f"[STARTUP] Failed to initialize OpenAI client: {str(e)}")
     raise
 
 async def get_completion(prompt: str) -> str:
