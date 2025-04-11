@@ -39,7 +39,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({ schedule, onSche
                 Time
               </th>
               {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((day) => (
-                <th key={day} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th key={day} className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {day}
                 </th>
               ))}
@@ -56,10 +56,10 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({ schedule, onSche
                 {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((day) => {
                   const item = schedule.find((s) => s.day === day && s.time.startsWith(time));
                   return (
-                    <td key={`${day}-${time}`} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td key={`${day}-${time}`} className="px-4 h-16 whitespace-nowrap text-sm text-gray-500">
                       {item && (
                         <div 
-                          className={`${getColorClass(item.type)} px-3 py-1 rounded-md text-center cursor-pointer hover:opacity-80 transition-opacity`}
+                          className={`${getColorClass(item.type)} mx-2 px-3 h-full flex items-center justify-center rounded-md cursor-pointer hover:opacity-80 transition-opacity`}
                           onClick={() => onScheduleItemClick(item)}
                         >
                           {item.subject}

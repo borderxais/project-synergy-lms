@@ -108,9 +108,9 @@ const HomeDashboardPage: React.FC = () => {
       title: 'Prepare for Social Science Presentation',
       completed: false,
       suggestions: [
-        'Saturday – Finish research and draft slides',
-        'Sunday – Practice speaking',
-        'Monday – Rehearse during study period',
+        'Finish research and draft slides',
+        'Practice speaking',
+        'Rehearse during study period',
       ],
     },
     {
