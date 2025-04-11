@@ -1,0 +1,54 @@
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: services/auth/dockerfile
+    ports:
+      - "3001:8000"
+    volumes:
+      - ./services/auth:/app
+      - ./db:/app/db
+      - ./services:/app/services
+    env_file:
+      - ./services/auth/.env
+    environment:
+      - FIREBASE_SERVICE_ACCOUNT_JSON=/app/db/serviceAccountKey.json
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/dockerfile
+    ports:
+      - "3002:8001"
+    volumes:
+      - ./services/api:/app
+      - ./db:/app/db
+      - ./services:/app/services
+    env_file:
+      - ./services/api/.env
+    depends_on:
+      - auth
+    restart: unless-stopped
+
+  llm:
+    build:
+      context: .
+      dockerfile: services/llm/dockerfile
+    ports:
+      - "3003:8002"
+    volumes:
+      - ./services/llm:/app
+      - ./db:/app/db
+      - ./services:/app/services
+    env_file:
+      - ./services/llm/src/.env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  db:
+  services:

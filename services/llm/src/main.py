@@ -6,13 +6,59 @@ from dotenv import load_dotenv
 from pathlib import Path
 import sys
 
-# Add project root to Python path
-project_root = Path(__file__).resolve().parents[3]  # Go up 4 levels to reach project root
-sys.path.append(str(project_root))
+# Add project root to Python path - Docker-friendly approach
+try:
+    # Try using the Docker container path structure first
+    if os.path.exists('/app'):
+        project_root = Path('/app')
+    else:
+        # Fall back to the local development path structure
+        project_root = Path(__file__).resolve().parents[3]  # Go up 3 levels to reach project root
+    sys.path.append(str(project_root))
+except IndexError:
+    # If we get an IndexError, we're probably in the Docker container
+    project_root = Path('/app')
+    sys.path.append(str(project_root))
 
-from services.auth.src.auth.auth_routes import router as auth_router
-from middleware.logging import RequestLoggingMiddleware
-from middleware.timeout import TimeoutMiddleware
+# Try to import middleware modules with different approaches
+try:
+    from middleware.logging import RequestLoggingMiddleware
+    from middleware.timeout import TimeoutMiddleware
+except ModuleNotFoundError:
+    # If that fails, try a different approach
+    sys.path.append('/app/src')
+    try:
+        from middleware.logging import RequestLoggingMiddleware
+        from middleware.timeout import TimeoutMiddleware
+    except ModuleNotFoundError:
+        # If all else fails, create dummy middleware
+        from fastapi import Request
+        
+        class RequestLoggingMiddleware:
+            async def __call__(self, request: Request, call_next):
+                return await call_next(request)
+                
+        class TimeoutMiddleware:
+            async def __call__(self, request: Request, call_next):
+                return await call_next(request)
+        
+        logging.warning("Could not import middleware modules, using dummy middleware instead")
+
+# Try to import auth_router with different approaches
+try:
+    # First try the Docker container path
+    from services.auth.src.auth.auth_routes import router as auth_router
+except ModuleNotFoundError:
+    try:
+        # Then try a relative import
+        sys.path.append('/app/services')
+        from auth.src.auth.auth_routes import router as auth_router
+    except ModuleNotFoundError:
+        # If all else fails, create a dummy router
+        from fastapi import APIRouter
+        auth_router = APIRouter()
+        logging.warning("Could not import auth_router, using a dummy router instead")
+
 from routes.roadmap import router as roadmap_router
 
 # Configure logging

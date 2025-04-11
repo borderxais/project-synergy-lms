@@ -8,9 +8,19 @@ from datetime import datetime
 import json
 from pathlib import Path
 
-# Add project root to Python path
-project_root = Path(__file__).resolve().parents[4]  # Go up 4 levels to reach project root
-sys.path.append(str(project_root))
+# Add project root to Python path - fix for Docker container structure
+# In Docker, the directory structure is different, so we need a more robust approach
+try:
+    # First try the original approach (for local development)
+    project_root = Path(__file__).resolve().parents[4]  # Go up 4 levels to reach project root
+    sys.path.append(str(project_root))
+except IndexError:
+    # If that fails, we're likely in the Docker container
+    # The app directory is mounted at /app in the container
+    project_root = Path("/app")
+    sys.path.append(str(project_root))
+    # Also add the services directory which is mounted at /app/services
+    sys.path.append("/app/services")
 
 from db.firestore_client import FirestoreClient
 from firebase_admin import auth, firestore
@@ -99,9 +109,6 @@ async def submit_onboarding(request: Request, token: Dict = Depends(verify_token
             "updatedAt": firestore.SERVER_TIMESTAMP
         })
         
-        # Log the cleaned data before saving
-        logger.info(f"Cleaned onboarding data structure: {json.dumps(cleaned_data, cls=FirestoreEncoder)}")
-        logger.info(f"Original onboarding data: {json.dumps(onboarding_data, default=str)}")
         
         # Update user profile with onboarding data
         await db_client.update_user_profile(user_id, cleaned_data)
@@ -126,7 +133,7 @@ async def submit_onboarding(request: Request, token: Dict = Depends(verify_token
                 try:
                     async with httpx.AsyncClient(timeout=60.0) as client:
                         roadmap_response = await client.post(
-                            "http://localhost:3003/generate-roadmap-from-db",
+                            "http://llm:8002/generate-roadmap-from-db",
                             json={
                                 "userId": user_id,
                                 "targetSchool": target_schools,
@@ -136,44 +143,8 @@ async def submit_onboarding(request: Request, token: Dict = Depends(verify_token
                         )
                         
                         if roadmap_response.status_code == 200:
-                            roadmap_data = roadmap_response.json()
-                            tasks = roadmap_data.get("data", {}).get("tasks", [])
+                            logger.info("Roadmap generated and saved successfully")
                             
-                            # Format tasks with proper timestamps
-                            formatted_tasks = []
-                            for task in tasks:
-                                due_date = task.get("dueDate")
-                                due_date_timestamp = None
-                                
-                                if due_date:
-                                    try:
-                                        due_date_dt = datetime.fromisoformat(due_date.replace("Z", "+00:00"))
-                                        due_date_timestamp = firestore.Timestamp.from_datetime(due_date_dt)
-                                    except:
-                                        # Default to 3 months from now
-                                        due_date_timestamp = None
-                                
-                                formatted_tasks.append({
-                                    "category": task.get("category", "general"),
-                                    "createdAt": firestore.SERVER_TIMESTAMP,
-                                    "dueDate": due_date_timestamp,
-                                    "isCompleted": False,
-                                    "priority": task.get("priority", "medium"),
-                                    "title": task.get("title"),
-                                    "description": task.get("description"),
-                                    "school": task.get("school", "All Schools"),
-                                    "updatedAt": firestore.SERVER_TIMESTAMP
-                                })
-                            
-                            # Update user document with tasks
-                            await db_client.update_user_profile(user_id, {
-                                "tasks": formatted_tasks,
-                                "totalTasks": len(formatted_tasks),
-                                "lastTaskGeneratedAt": firestore.SERVER_TIMESTAMP,
-                                "updatedAt": firestore.SERVER_TIMESTAMP
-                            })
-                            
-                            tasks = formatted_tasks
                 except Exception as e:
                     logger.error(f"Error generating roadmap: {e}")
                     # Continue without tasks if roadmap generation fails
@@ -182,7 +153,6 @@ async def submit_onboarding(request: Request, token: Dict = Depends(verify_token
         return {
             "success": True,
             "message": "Onboarding completed successfully",
-            "tasks": tasks
         }
     except HTTPException as e:
         raise e
@@ -214,7 +184,7 @@ async def analyze_schools(request: Request, token: Dict = Depends(verify_token))
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
                 analysis_response = await client.post(
-                    "http://localhost:3001/analyze-schools",
+                    "http://llm:8002/analyze-schools",
                     json={"schools": school_data},
                     headers={"Content-Type": "application/json"}
                 )

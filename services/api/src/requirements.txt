@@ -1,0 +1,6 @@
+fastapi>=0.95.0
+uvicorn>=0.21.1
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+firebase-admin>=6.1.0  # If your API service also uses Firebase
+httpx>=0.24.0  # HTTP client for making API calls

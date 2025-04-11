@@ -694,3 +694,110 @@ admin.initializeApp({
 Note: Make sure to replace `your-project-id` with your actual Firebase project ID.
 
 By following these steps, you can set up a Firebase service account and generate credentials to use in your application.
+
+# Synergy LMS
+
+A comprehensive Learning Management System with multiple portals and microservices architecture.
+
+## Project Structure
+
+The project follows a monorepo structure:
+
+- `/packages`: Frontend applications
+  - `student-portal`: Portal for students
+  - `teacher-portal`: Portal for teachers
+  - `parent-portal`: Portal for parents
+  - `admin-portal`: Portal for administrators
+  - `landing-page`: Main landing page
+
+- `/services`: Backend microservices
+  - `auth`: Authentication service
+  - `api`: Main API service
+  - `llm`: LLM-based services for roadmap generation
+
+- `/db`: Shared database utilities
+
+## Services Architecture
+
+The backend is composed of three microservices:
+
+1. **Auth Service**: Handles user authentication and authorization using Firebase Auth
+2. **API Service**: Provides core API functionality for the application
+3. **LLM Service**: Generates personalized roadmaps using OpenAI
+
+## Docker Setup
+
+The project includes Docker configuration for all backend services. To run the services using Docker:
+
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Start services in detached mode
+docker-compose up -d
+
+# Stop all services
+docker-compose down
+```
+
+### Service Ports
+
+When running with Docker, the services are accessible at:
+
+- Auth Service: http://localhost:3001
+- API Service: http://localhost:3002
+- LLM Service: http://localhost:3003
+
+### Environment Configuration
+
+Each service requires its own environment configuration:
+
+- Auth Service: `/services/auth/.env`
+- API Service: `/services/api/.env`
+- LLM Service: `/services/llm/src/.env`
+
+Additionally, Firebase configuration requires a `serviceAccountKey.json` file in the `/db` directory.
+
+## Development Setup
+
+### Prerequisites
+
+- Node.js (for frontend packages)
+- Python 3.8+ (for backend services)
+- Docker and Docker Compose (for containerized deployment)
+
+### Running Services Locally
+
+Each service can also be run locally without Docker:
+
+```bash
+# Auth Service
+cd services/auth
+python -m pip install -r requirements.txt
+python main.py
+
+# API Service
+cd services/api
+python -m pip install -r requirements.txt
+python main.py
+
+# LLM Service
+cd services/llm
+python -m pip install -r src/requirements.txt
+python main.py
+```
+
+## Known Issues and Solutions
+
+### Firestore Sentinel Serialization
+
+The system handles Firestore SERVER_TIMESTAMP objects by:
+- Using string representations of Sentinel objects when communicating between services
+- Converting these strings to actual Firestore SERVER_TIMESTAMP objects before saving to the database
+
+### Service Communication in Docker
+
+Services communicate with each other using their service names in the Docker network, not localhost:
+- Auth Service: `http://auth:8000`
+- API Service: `http://api:8001`
+- LLM Service: `http://llm:8002`
