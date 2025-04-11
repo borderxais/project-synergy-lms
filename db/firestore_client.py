@@ -1,4 +1,4 @@
-from google.cloud import firestore
+# from google.cloud import firestore
 from typing import List, Dict, Any, Optional
 import logging
 from datetime import datetime
@@ -7,6 +7,20 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from pathlib import Path
 import traceback
+from google.cloud.firestore_v1.transforms import Sentinel
+
+def replace_sentinel_strings(obj):
+    """Recursively replace Sentinel string or actual sentinel object with Firestore server timestamp."""
+    if isinstance(obj, dict):
+        return {k: replace_sentinel_strings(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_sentinel_strings(v) for v in obj]
+    elif isinstance(obj, str) and "Sentinel" in obj:
+        return firestore.SERVER_TIMESTAMP
+    elif isinstance(obj, Sentinel):  # Handle actual Sentinel objects
+        return firestore.SERVER_TIMESTAMP
+    return obj
+
 
 logger = logging.getLogger(__name__)
 
@@ -66,92 +80,97 @@ class FirestoreClient:
             raise
 
     async def update_user_profile(self, user_id: str, profile_data: Dict[str, Any]) -> None:
-        """Update user profile with onboarding data."""
+        """Update a user profile in Firestore."""
         try:
-            logger.info(f"update_user_profile called with user_id: {user_id}")
+            logger.info(f"Updating user profile for {user_id}")
             
-            # Use a custom encoder for logging to handle Firestore Sentinel objects
-            def default_serializer(obj):
-                if hasattr(obj, '_sentinel_type'):
-                    return f"Sentinel: {obj._sentinel_type}"
-                if hasattr(obj, 'isoformat'):
-                    return obj.isoformat()
-                return str(obj)
-                
-            logger.info(f"Received profile_data: {json.dumps(profile_data, default=default_serializer)}")
-            logger.info(f"Profile data keys: {list(profile_data.keys())}")
-            
+            # Get a reference to the user document
             user_ref = self.db.collection('users').document(user_id)
             
-            # First, get the current user data to preserve existing fields
+            # Check if the document exists
             user_doc = user_ref.get()
             if not user_doc.exists:
-                logger.warning(f"User document {user_id} does not exist")
+                logger.warning(f"User document {user_id} does not exist, creating it")
+                # Create the document with the provided data
+                user_ref.set(profile_data)
                 return
-                
-            current_user_data = user_doc.to_dict()
-            logger.info(f"Current user data keys: {list(current_user_data.keys() if current_user_data else [])}")
             
-            # Check if we're receiving a nested structure with studentProfile
+            # If the document exists, update it based on the structure of profile_data
             if 'studentProfile' in profile_data:
                 logger.info("Found studentProfile in profile_data, using nested structure")
                 
                 # Use the provided studentProfile structure directly
-                user_ref.update(profile_data)
+                # Process the data to handle Sentinel strings before updating
+                sanitized_profile_data = replace_sentinel_strings(profile_data)
+                
+                # For nested structures, we need to update field by field to handle SERVER_TIMESTAMP correctly
+                for key, value in sanitized_profile_data.items():
+                    # Handle nested dictionaries separately to avoid Sentinel serialization issues
+                    if isinstance(value, dict):
+                        for nested_key, nested_value in value.items():
+                            field_path = f"{key}.{nested_key}"
+                            user_ref.update({field_path: nested_value})
+                    else:
+                        user_ref.update({key: value})
+                
                 logger.info("Updated user document with provided studentProfile structure")
             elif 'tasks' in profile_data:
                 # This is a task update, preserve the existing studentProfile
-                logger.info("Task update detected, preserving existing studentProfile")
+                logger.info("Found tasks in profile_data, updating tasks")
                 
-                # Create update data without modifying studentProfile
-                update_data = profile_data.copy()
+                # Extract tasks and other top-level fields
+                tasks = profile_data.pop('tasks', [])
                 
-                # Update user document without modifying studentProfile
-                logger.info(f"Updating user document with tasks (keys: {list(update_data.keys())})")
-                user_ref.update(update_data)
-                logger.info("Updated user document with tasks while preserving studentProfile")
+                # First update all non-task fields
+                if profile_data:
+                    sanitized_data = {}
+                    for key, value in profile_data.items():
+                        if isinstance(value, str) and "Sentinel" in value:
+                            sanitized_data[key] = firestore.SERVER_TIMESTAMP
+                        else:
+                            sanitized_data[key] = value
+                    
+                    if sanitized_data:
+                        user_ref.update(sanitized_data)
+                        logger.info(f"Updated non-task fields: {list(sanitized_data.keys())}")
+                
+                # Then update tasks separately
+                if tasks:
+                    # Instead of trying to sanitize the existing tasks, create a completely new array
+                    # with clean values to avoid any Sentinel serialization issues
+                    clean_tasks = []
+                    
+                    for task in tasks:
+                        # Create a new task dictionary with clean values
+                        clean_task = {}
+                        for k, v in task.items():
+                            # Special handling for timestamp fields
+                            if k in ['createdAt', 'updatedAt']:
+                                # Always use a fresh SERVER_TIMESTAMP for these fields
+                                clean_task[k] = firestore.SERVER_TIMESTAMP
+                            else:
+                                # Copy other fields as is
+                                clean_task[k] = v
+                        
+                        clean_tasks.append(clean_task)
+                    
+                    # Update tasks field with completely clean tasks
+                    logger.info(f"Updating tasks array with {len(clean_tasks)} clean tasks")
+                    
+                    # Use a direct update without any further processing
+                    user_ref.update({"tasks": clean_tasks})
+                    logger.info(f"Successfully updated tasks array")
+                
+                logger.info("Updated user document with tasks and other fields")
             else:
-                logger.info("No studentProfile in profile_data, using legacy format")
+                # This is a simple update, just update the fields provided
+                logger.info("Simple update, updating fields directly")
                 
-                # Structure the student profile data
-                student_profile = {
-                    'collegePreferences': {
-                        'schoolCategories': profile_data.get('schoolCategories', []),
-                        'targetSchools': profile_data.get('targetSchools', []),
-                        'earlyDecision': profile_data.get('earlyDecision', 'none')
-                    },
-                    'generalInfo': {
-                        'currentSchool': profile_data.get('currentSchool', ''),
-                        'firstName': profile_data.get('firstName', ''),
-                        'lastName': profile_data.get('lastName', ''),
-                        'schoolType': profile_data.get('schoolType', ''),
-                        'grade': profile_data.get('grade', 0),
-                        'gender': profile_data.get('gender', 'PreferNotToSay')
-                    },
-                    'highSchoolProfile': {
-                        'currentClasses': profile_data.get('currentClasses', []),
-                        'extracurriculars': profile_data.get('extracurriculars', []),
-                        'gpa': profile_data.get('gpa', 0.0),
-                        'weightedGpa': profile_data.get('weightedGpa', 0.0),
-                        'plannedTests': profile_data.get('plannedTests', []),
-                        'studyStylePreference': profile_data.get('studyStylePreference', [])
-                    }
-                }
+                # Process the data to handle Sentinel strings before updating
+                sanitized_data = replace_sentinel_strings(profile_data)
+                user_ref.update(sanitized_data)
                 
-                logger.info(f"Created student_profile structure: {json.dumps(student_profile, default=default_serializer)}")
-
-                # Update user document
-                update_data = {
-                    'studentProfile': student_profile,
-                    'isOnboarded': True,
-                    'onboardedAt': firestore.SERVER_TIMESTAMP,
-                    'lastTaskGeneratedAt': firestore.SERVER_TIMESTAMP
-                }
-                logger.info(f"Updating user document with: {json.dumps(update_data, default=default_serializer)}")
-                user_ref.update(update_data)
-                logger.info("Updated user document with created studentProfile structure")
-
-            logger.info(f"Successfully updated user profile for ID: {user_id}")
+                logger.info(f"Updated user document with fields: {list(sanitized_data.keys())}")
         except Exception as e:
             logger.error(f"Error updating user profile: {e}")
             logger.error(f"Error details: {traceback.format_exc()}")
