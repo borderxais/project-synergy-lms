@@ -49,6 +49,24 @@ services:
       - api
     restart: unless-stopped
 
+  crew:
+    build:
+      context: ./services/crew
+      dockerfile: Dockerfile
+    ports:
+      - "3004:8003"
+    volumes:
+      - ./services/crew:/app
+      - ./db:/app/db
+      - ./services:/app/services
+    env_file:
+      - ./services/crew/.env
+    environment:
+      - FIREBASE_SERVICE_ACCOUNT_JSON=/app/db/serviceAccountKey.json
+    depends_on:
+      - api
+    restart: unless-stopped
+
 volumes:
   db:
   services:
