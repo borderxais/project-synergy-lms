@@ -27,3 +27,65 @@ dist-ssr
 db/serviceAccountKey.json
 
 services/letta/src/config/serviceAccountKey.json
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+
+# Environment files
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.env
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# History files
+.history/
+
+# Service-specific cache files
+services/api/__pycache__/
+services/api/src/routes/__pycache__/
+services/auth/__pycache__/
+services/auth/src/auth/__pycache__/
+services/crew/src/__pycache__/
+services/crew/src/tools/__pycache__/
+services/llm/src/__pycache__/
+services/llm/src/llm_services/__pycache__/
+services/llm/src/middleware/__pycache__/
+services/llm/src/models/__pycache__/
+services/llm/src/routes/__pycache__/
+services/llm/src/utils/__pycache__/
+db/__pycache__/
+
+# Local database files
+*.sqlite3
+*.db
+
+# Docker volumes
+data/

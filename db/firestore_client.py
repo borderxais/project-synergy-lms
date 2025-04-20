@@ -246,6 +246,16 @@ class FirestoreClient:
         except Exception as e:
             logger.error(f"Error updating document in {collection}: {e}")
             raise
+            
+    def update_document_sync(self, collection: str, doc_id: str, data: Dict[str, Any]) -> None:
+        """Synchronous version of update_document."""
+        try:
+            doc_ref = self.db.collection(collection).document(doc_id)
+            doc_ref.update(data)
+            logger.info(f"Successfully updated document {doc_id} in {collection}")
+        except Exception as e:
+            logger.error(f"Error updating document in {collection}: {e}")
+            raise
 
     async def get_tasks(self, user_id: str) -> List[Dict[str, Any]]:
         """Get all tasks for a user."""
@@ -650,4 +660,131 @@ class FirestoreClient:
             return student_ref.id
         except Exception as e:
             logger.error(f"Error creating student profile: {e}")
+            raise
+
+    def get_user_profile_sync(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get a user's profile by ID (synchronous version)."""
+        try:
+            user_ref = self.db.collection('users').document(user_id)
+            user_doc = user_ref.get()
+            if not user_doc.exists:
+                logger.warning(f"User {user_id} not found")
+                return None
+            
+            user_data = user_doc.to_dict()
+            user_data['id'] = user_doc.id
+            return user_data
+        except Exception as e:
+            logger.error(f"Error getting user profile: {e}")
+            raise
+
+    def get_all_documents_sync(self, collection: str) -> List[Dict[str, Any]]:
+        """Get all documents from a Firestore collection (synchronous version)."""
+        try:
+            docs = self.db.collection(collection).stream()
+            result = []
+            for doc in docs:
+                doc_data = doc.to_dict()
+                doc_data['id'] = doc.id
+                result.append(doc_data)
+            return result
+        except Exception as e:
+            logger.error(f"Error getting documents from {collection}: {e}")
+            raise
+
+    def update_user_profile_sync(self, user_id: str, profile_data: Dict[str, Any]) -> None:
+        """Update a user profile in Firestore (synchronous version)."""
+        try:
+            logger.info(f"Updating user profile for {user_id} (sync)")
+            
+            # Get a reference to the user document
+            user_ref = self.db.collection('users').document(user_id)
+            
+            # Check if the document exists
+            user_doc = user_ref.get()
+            if not user_doc.exists:
+                logger.warning(f"User document {user_id} does not exist, creating it")
+                # Create the document with the provided data
+                user_ref.set(profile_data)
+                return
+            
+            # If the document exists, update it based on the structure of profile_data
+            if 'studentProfile' in profile_data:
+                logger.info("Found studentProfile in profile_data, using nested structure")
+                
+                # Use the provided studentProfile structure directly
+                # Process the data to handle Sentinel strings before updating
+                sanitized_profile_data = replace_sentinel_strings(profile_data)
+                
+                # For nested structures, we need to update field by field to handle SERVER_TIMESTAMP correctly
+                for key, value in sanitized_profile_data.items():
+                    # Handle nested dictionaries separately to avoid Sentinel serialization issues
+                    if isinstance(value, dict):
+                        for nested_key, nested_value in value.items():
+                            field_path = f"{key}.{nested_key}"
+                            user_ref.update({field_path: nested_value})
+                    else:
+                        user_ref.update({key: value})
+                
+                logger.info("Updated user document with provided studentProfile structure")
+            elif 'tasks' in profile_data:
+                # This is a task update, preserve the existing studentProfile
+                logger.info("Found tasks in profile_data, updating tasks")
+                
+                # Extract tasks and other top-level fields
+                tasks = profile_data.pop('tasks', [])
+                
+                # First update all non-task fields
+                if profile_data:
+                    sanitized_data = {}
+                    for key, value in profile_data.items():
+                        if isinstance(value, str) and "Sentinel" in value:
+                            sanitized_data[key] = firestore.SERVER_TIMESTAMP
+                        else:
+                            sanitized_data[key] = value
+                    
+                    if sanitized_data:
+                        user_ref.update(sanitized_data)
+                        logger.info(f"Updated non-task fields: {list(sanitized_data.keys())}")
+                
+                # Then update tasks separately
+                if tasks:
+                    # Instead of trying to sanitize the existing tasks, create a completely new array
+                    # with clean values to avoid any Sentinel serialization issues
+                    clean_tasks = []
+                    
+                    for task in tasks:
+                        # Create a new task dictionary with clean values
+                        clean_task = {}
+                        for k, v in task.items():
+                            # Special handling for timestamp fields
+                            if k in ['createdAt', 'updatedAt']:
+                                # Always use a fresh SERVER_TIMESTAMP for these fields
+                                clean_task[k] = firestore.SERVER_TIMESTAMP
+                            else:
+                                # Copy other fields as is
+                                clean_task[k] = v
+                        
+                        clean_tasks.append(clean_task)
+                    
+                    # Update tasks field with completely clean tasks
+                    logger.info(f"Updating tasks array with {len(clean_tasks)} clean tasks")
+                    
+                    # Use a direct update without any further processing
+                    user_ref.update({"tasks": clean_tasks})
+                    logger.info(f"Successfully updated tasks array")
+                
+                logger.info("Updated user document with tasks and other fields")
+            else:
+                # This is a simple update, just update the fields provided
+                logger.info("Simple update, updating fields directly")
+                
+                # Process the data to handle Sentinel strings before updating
+                sanitized_data = replace_sentinel_strings(profile_data)
+                user_ref.update(sanitized_data)
+                
+                logger.info(f"Updated user document with fields: {list(sanitized_data.keys())}")
+        except Exception as e:
+            logger.error(f"Error updating user profile: {e}")
+            logger.error(f"Error details: {traceback.format_exc()}")
             raise

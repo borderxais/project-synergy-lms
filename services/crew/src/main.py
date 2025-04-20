@@ -1,10 +1,9 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 import warnings
-from typing import Dict
-
-from .crew import LmsCrew
+import sys
+from pathlib import Path
 
 # Configure logging
 logging.basicConfig(
@@ -32,35 +31,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/api/crew/recommendations")
-async def get_college_recommendations(request: Request):
-    """Get personalized college recommendations for a student."""
-    data = await request.json()
-    try:
-        # Extract student profile data
-        inputs = {
-            'student_GPA': data.get('gpa'),
-            'student_sat': data.get('sat'),
-            'student_act': data.get('act'),
-            'student_interests': data.get('interests', [])
-        }
-        
-        # Run the crew
-        crew = LmsCrew()
-        result = crew.crew().kickoff(inputs=inputs)
-        
-        return {
-            "success": True,
-            "recommendations": result
-        }
-    except Exception as e:
-        logger.error(f"Error getting recommendations: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# Import and include routers
+from .routes import recommendations_router, roadmap_router, health_router
 
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {"status": "ok"}
+# Include the API routers
+app.include_router(recommendations_router)
+app.include_router(roadmap_router)
+
+# Include the health check router
+app.include_router(health_router)
 
 if __name__ == "__main__":
     import uvicorn

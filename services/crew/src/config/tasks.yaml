@@ -11,3 +11,17 @@ reporting_task:
   expected_output: >
     A JSON-formatted recommendation report containing the top 10 colleges, where each college entry includes the name and reason for recommendation.
   agent: college_admission_advisor
+
+roadmap_task:
+  description: >
+    Generate a personalized roadmap for the college application process using ONLY the provided input parameters. Do not make up or guess any information.
+    
+    Use the exact user_id provided in the inputs: {user_id}
+    Use the exact target_schools provided in the inputs: {target_schools}
+    Use the student_profile data provided in the inputs to understand the student's background, interests, and academic information.
+    
+    The FirestoreRoadmapTool will handle fetching any additional data needed and updating the database. Do not attempt to use hardcoded or sample user IDs.
+  expected_output: "A detailed roadmap with tasks, deadlines, and priorities for the college application process."
+  agent: "roadmap_generator"
+  max_retries: 3
+  retry_on_fail: true

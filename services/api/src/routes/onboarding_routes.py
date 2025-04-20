@@ -133,10 +133,10 @@ async def submit_onboarding(request: Request, token: Dict = Depends(verify_token
                 try:
                     async with httpx.AsyncClient(timeout=60.0) as client:
                         roadmap_response = await client.post(
-                            "http://llm:8002/generate-roadmap-from-db",
+                            "http://crew:8003/api/crew/roadmap",
                             json={
                                 "userId": user_id,
-                                "targetSchool": target_schools,
+                                "targetSchools": target_schools,
                                 "schoolInfo": college_data
                             },
                             headers={"Content-Type": "application/json"}
