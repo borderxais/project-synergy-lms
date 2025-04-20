@@ -1,0 +1,13 @@
+matching_task:
+  description: >
+    Review the filtered list of colleges returned by the Firestore tool by inputing GPA: {student_GPA}, SAT: {student_sat}, ACT: {student_act}. If any field is None then ignore it. Use your own reasoning and knowledge of admissions to re-evaluate the results based on the student's profile GPA: {student_GPA}, SAT: {student_sat}, ACT: {student_act}, Interests: {student_interests}. Refine the list to include up to 20 institutions where the student is most likely to be a good fit. If fewer than 20 colleges are available from the initial filtered list, include them all.
+  expected_output: >
+    A refined, prioritized python list of up to 20 recommended colleges based on deeper analysis of the filtered set, aligned with the student's academic performance.
+  agent: student_data_matcher
+
+reporting_task:
+  description: >
+    Using the refined college list and the student's academic interests {student_interests}, compile a detailed college application recommendation report. Clearly outline the top 10 colleges the student should consider applying to, with specific justifications for each recommendation based on fit, competitiveness, and alignment with the student's goals.
+  expected_output: >
+    A JSON-formatted recommendation report containing the top 10 colleges, where each college entry includes the name and reason for recommendation.
+  agent: college_admission_advisor
