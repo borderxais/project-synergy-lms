@@ -24,11 +24,6 @@ export function OnboardingLayout({
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Logo */}
         <div className="flex items-center space-x-2 mb-8">
-          <img
-            src="/logo.svg"
-            alt="Private School Prep"
-            className="h-8 w-8"
-          />
           <span className="text-xl font-bold text-gray-900">
             Private School Prep
           </span>
