@@ -167,45 +167,55 @@ const DashboardPage: React.FC = () => {
 
         // Transform tasks into goal structures
         const transformTasks = (tasks: any[]) => {
-          const academicGoals = (tasks || [])
-            .filter(task => task.category === 'Test Prep')
-            .map(task => ({
+          // Group tasks by their categories dynamically
+          const tasksByCategory: Record<string, any[]> = {};
+          
+          // Process all tasks and group them by category
+          (tasks || []).forEach(task => {
+            const category = task.category || 'Other';
+            
+            if (!tasksByCategory[category]) {
+              tasksByCategory[category] = [];
+            }
+            
+            tasksByCategory[category].push({
               title: task.title || 'Untitled Task',
               target: task.description || '',
               deadline: convertTimestamp(task.dueDate),
+              priority: task.priority || 'medium',
+              school: task.school || 'All Schools',
               tasks: [{
                 text: task.description || '',
                 completed: task.isCompleted || false
               }]
-            }));
-
-          const applicationGoals = (tasks || [])
-            .filter(task => task.category === 'Application')
-            .map(task => ({
-              title: task.title || 'Untitled Task',
-              target: task.description || '',
-              deadline: convertTimestamp(task.dueDate),
-              tasks: [{
-                text: task.description || '',
-                completed: task.isCompleted || false
-              }]
-            }));
-
-          const financialAidGoals = (tasks || [])
-            .filter(task => task.category === 'Financial Aid')
-            .map(task => ({
-              title: task.title || 'Untitled Task',
-              target: task.description || '',
-              deadline: convertTimestamp(task.dueDate),
-              tasks: [{
-                text: task.description || '',
-                completed: task.isCompleted || false
-              }]
-            }));
-
+            });
+          });
+          
           return {
-            academicGoals,
-            extracurricularGoals: [...applicationGoals, ...financialAidGoals]
+            tasksByCategory: tasksByCategory,
+            // Keep these for backward compatibility
+            academicGoals: (tasks || [])
+              .filter(task => task.category === 'Test Prep')
+              .map(task => ({
+                title: task.title || 'Untitled Task',
+                target: task.description || '',
+                deadline: convertTimestamp(task.dueDate),
+                tasks: [{
+                  text: task.description || '',
+                  completed: task.isCompleted || false
+                }]
+              })),
+            extracurricularGoals: (tasks || [])
+              .filter(task => task.category === 'Application' || task.category === 'Financial Aid')
+              .map(task => ({
+                title: task.title || 'Untitled Task',
+                target: task.description || '',
+                deadline: convertTimestamp(task.dueDate),
+                tasks: [{
+                  text: task.description || '',
+                  completed: task.isCompleted || false
+                }]
+              }))
           };
         };
 

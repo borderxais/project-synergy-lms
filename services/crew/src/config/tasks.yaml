@@ -29,6 +29,14 @@ roadmap_task:
     - Student's interests and study style preferences when making recommendations
     - Assign appropriate priority levels (high/medium/low) to tasks based on urgency and importance
     
+    IMPORTANT: ONLY USE THESE EXACT TASK CATEGORIES:
+    1. "Test Prep" - For all test-related tasks (SAT/ACT registration, preparation, etc.)
+    2. "Application" - For application forms, submission deadlines, and recommendation letters
+    3. "Financial Aid" - For FAFSA, scholarships, and financial aid applications
+    4. "Essay" - For personal statements and school-specific essays
+    5. "Research" - For school research, program investigation, and campus visits
+    6. "Extracurricular" - For activities to enhance application profile
+    
     RECOMMENDATION PRIORITIES:
     Assign priorities to recommendations based on these factors:
     - HIGH priority: Critical actions needed immediately (low GPA for target schools, missing required tests, approaching deadlines)
@@ -44,7 +52,7 @@ roadmap_task:
        - "title": A concise task title
        - "description": A detailed description of what needs to be done
        - "dueDate": In YYYY-MM-DD format
-       - "category": One of "Application", "Test Prep", "Essay", "Financial Aid", "Research"
+       - "category": MUST be one of ONLY these six: "Test Prep", "Application", "Financial Aid", "Essay", "Research", "Extracurricular"
        - "priority": One of "high", "medium", "low"
        - "school": The specific school or "All Schools" if applicable to all
     
@@ -57,24 +65,104 @@ roadmap_task:
       "tasks": [
         {
           "id": "task_1",
-          "title": "Complete SAT Preparation",
-          "description": "Study for the SAT using practice tests and review materials",
+          "title": "Register for SAT/ACT",
+          "description": "Register for upcoming SAT or ACT test dates based on your preferred test prep method.",
+          "dueDate": "2025-03-15",
+          "category": "Test Prep",
+          "priority": "high",
+          "school": "All Schools"
+        },
+        {
+          "id": "task_2",
+          "title": "Complete SAT/ACT Preparation",
+          "description": "Study for the SAT/ACT using practice tests and review materials aligned with your visual learning style.",
           "dueDate": "2025-05-15",
           "category": "Test Prep",
           "priority": "high",
+          "school": "All Schools"
+        },
+        {
+          "id": "task_3",
+          "title": "Draft Personal Statement",
+          "description": "Write your common application personal statement focusing on your academic interests and experiences.",
+          "dueDate": "2025-07-30",
+          "category": "Essay",
+          "priority": "high",
+          "school": "All Schools"
+        },
+        {
+          "id": "task_4",
+          "title": "Research UCLA Programs",
+          "description": "Research specific programs at UCLA that align with your STEM interests to mention in your application.",
+          "dueDate": "2025-08-15",
+          "category": "Research",
+          "priority": "medium",
+          "school": "UCLA"
+        },
+        {
+          "id": "task_5",
+          "title": "Complete UCLA Supplemental Essays",
+          "description": "Write the UCLA-specific essays focusing on your academic achievements and interests.",
+          "dueDate": "2025-10-15",
+          "category": "Essay",
+          "priority": "high",
+          "school": "UCLA"
+        },
+        {
+          "id": "task_6",
+          "title": "Submit FAFSA Application",
+          "description": "Complete and submit the Free Application for Federal Student Aid (FAFSA) for financial assistance.",
+          "dueDate": "2025-10-01",
+          "category": "Financial Aid",
+          "priority": "high",
+          "school": "All Schools"
+        },
+        {
+          "id": "task_7",
+          "title": "Request Letters of Recommendation",
+          "description": "Ask teachers who know your academic abilities well to write recommendation letters for your applications.",
+          "dueDate": "2025-09-01",
+          "category": "Application",
+          "priority": "high",
+          "school": "All Schools"
+        },
+        {
+          "id": "task_8",
+          "title": "Submit UCLA Application",
+          "description": "Complete and submit your UCLA application before the deadline, ensuring all required materials are included.",
+          "dueDate": "2025-11-30",
+          "category": "Application",
+          "priority": "high",
+          "school": "UCLA"
+        },
+        {
+          "id": "task_9",
+          "title": "Join Academic Club",
+          "description": "Participate in a STEM-related academic club to enhance your extracurricular profile.",
+          "dueDate": "2025-04-30",
+          "category": "Extracurricular",
+          "priority": "medium",
           "school": "All Schools"
         }
       ],
       "recommendations": [
         {
-          "text": "Join academic clubs to enhance your extracurricular profile",
+          "text": "Join academic clubs related to STEM to enhance your extracurricular profile",
           "priority": "medium"
+        },
+        {
+          "text": "Schedule a campus visit to UCLA if possible to demonstrate interest",
+          "priority": "low"
+        },
+        {
+          "text": "Create a calendar system to track all application deadlines",
+          "priority": "high"
         }
       ]
     }
     
     Tasks should be logically sequenced with earlier deadlines for preparation activities
-    and appropriate spacing to avoid overwhelming the student.
+    and appropriate spacing to avoid overwhelming the student. Always include application submission tasks for each target school.
   agent: "roadmap_generator"
   max_retries: 3
   retry_on_fail: true
