@@ -1,5 +1,5 @@
 import React from 'react';
-import { Student } from '../../types/student';
+import { Student } from '../../../types/student';
 
 interface AchievementsProps {
   student?: Student | null;

@@ -7,9 +7,9 @@ interface CurrentCoursesProps {
 
 const CurrentCourses: React.FC<CurrentCoursesProps> = ({ courses }) => {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6 h-full flex flex-col">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">Current Courses</h2>
-      <div className="space-y-4">
+      <div className="space-y-4 flex-grow overflow-auto">
         {courses.map((course) => (
           <div key={course.id} className="border rounded-lg p-4">
             <h3 className="font-medium text-lg">{course.name}</h3>

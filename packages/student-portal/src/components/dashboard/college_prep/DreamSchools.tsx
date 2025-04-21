@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Student } from '../../types/student';
+import { Student } from '../../../types/student';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@privschool-lms/common/lib/firebase';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Student } from '../../types/student';
+import { Student } from '../../../types/student';
 
 interface RoadmapProps {
   student?: Student | null;

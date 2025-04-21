@@ -85,7 +85,8 @@ export const DataRetrievalPage: React.FC = () => {
             schoolCategories: []
           }
         },
-        tasks: userData.tasks || []
+        tasks: userData.tasks || [],
+        recommendations: userData.recommendations || []
       };
 
       console.log('[DataRetrieval] Transformed data:', transformedData);
