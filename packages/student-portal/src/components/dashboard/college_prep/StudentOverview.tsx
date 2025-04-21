@@ -1,7 +1,8 @@
 import React from 'react';
-import { Student } from '../../types/student';
-import { Course } from '../../types/dashboard';
-import CurrentCourses from '../dashboard/home/CurrentCourses';
+import { Student } from '../../../types/student';
+import { Course } from '../../../types/dashboard';
+import CurrentCourses from '../home/CurrentCourses';
+import Recommendation from './Recommendation';
 
 interface StudentOverviewProps {
   student?: Student | null;
@@ -176,6 +177,31 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Recommendations Section - Moved above Current Courses */}
+      <div className="bg-white rounded-xl p-6 shadow-sm">
+        <h2 className="text-lg font-semibold mb-4 text-gray-900 flex items-center">
+          <span>Personalized Recommendations</span>
+          <span className="ml-2 text-gray-500 text-base">个性化建议</span>
+        </h2>
+        
+        <Recommendation 
+          recommendations={student?.recommendations} 
+          onToggleAction={(recommendationId, actionIndex) => {
+            if (student && student.recommendations) {
+              const updatedRecommendations = [...student.recommendations];
+              const recIndex = updatedRecommendations.findIndex(rec => rec.id === recommendationId);
+              
+              if (recIndex !== -1 && updatedRecommendations[recIndex].actions && updatedRecommendations[recIndex].actions![actionIndex]) {
+                updatedRecommendations[recIndex].actions![actionIndex].completed = 
+                  !updatedRecommendations[recIndex].actions![actionIndex].completed;
+                
+                onUpdate?.({ recommendations: updatedRecommendations });
+              }
+            }
+          }} 
+        />
       </div>
 
       {/* Current Courses */}

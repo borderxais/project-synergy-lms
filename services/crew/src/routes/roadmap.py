@@ -5,7 +5,8 @@ from typing import Dict
 from db.firestore_client import FirestoreClient
 from ..crew import LmsCrew
 from ..tools.roadmap_tool import sanitize_firebase_data
-from crewai import Crew, Process
+from crewai import Crew, Process, CrewOutput
+import json
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -35,7 +36,6 @@ async def generate_roadmap(request: Request):
         # Extract required data
         user_id = data.get('userId')
         target_schools = data.get('targetSchools', [])
-        school_info = data.get('schoolInfo', [])
         
         if not user_id or not target_schools:
             raise HTTPException(status_code=400, detail="Missing userId or targetSchools")
@@ -43,15 +43,14 @@ async def generate_roadmap(request: Request):
         logger.info(f"Generating roadmap for user {user_id} targeting {target_schools}")
         
         # Get school data from Firestore if not provided
-        if not school_info:
-            logger.info(f"We did not get school info from the client, so we're fetching it from Firestore")
-            try:
-                school_info = await db_client.get_all_documents('US-Colleges')
-                if not school_info:
-                    raise HTTPException(status_code=404, detail=f"Schools not found")
-            except Exception as e:
-                logger.error(f"Error fetching schools: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
+        logger.info(f"Fetching school info from Firestore")
+        try:
+            school_info = await db_client.get_all_documents('US-Colleges')
+            if not school_info:
+                raise HTTPException(status_code=404, detail=f"Schools not found")
+        except Exception as e:
+            logger.error(f"Error fetching schools: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
         
         # Get user profile from Firestore
         user_profile = await get_user_profile(user_id)
@@ -89,12 +88,45 @@ async def generate_roadmap(request: Request):
         )
         
         # Run only the roadmap task
-        result = roadmap_crew.kickoff(inputs=inputs)
+        roadmap_result = roadmap_crew.kickoff(inputs=inputs)
+
+        # Proper CrewOutput handling
+        if isinstance(roadmap_result, CrewOutput):
+            # Access the raw output correctly
+            roadmap_data_str = roadmap_result.raw
+            
+            # Try parsing JSON if available
+            if roadmap_result.json_dict:
+                roadmap_data = roadmap_result.json_dict
+            else:
+                try:
+                    roadmap_data = json.loads(roadmap_data_str)
+                except json.JSONDecodeError:
+                    roadmap_data = {"error": "Failed to parse JSON output"}
+        else:
+            roadmap_data = roadmap_result
+        
+        logger.info(f"Processed roadmap data: {roadmap_data}")
+        
+        # Add detailed logging about the roadmap_data
+        logger.info(f"Type of roadmap_data: {type(roadmap_data)}")
+        logger.info(f"Keys in roadmap_data: {roadmap_data.keys() if isinstance(roadmap_data, dict) else 'Not a dict'}")
+        
+        # Initialize the roadmap tool
+        roadmap_tool = lms_crew.roadmap_tool
+        
+        # Save the roadmap to Firestore - use roadmap_data, not the original result
+        save_result = roadmap_tool.save_roadmap_to_firestore(user_id, roadmap_data)
+        logger.info(f"Roadmap saved to Firestore: {save_result}")
         
         return {
             "success": True,
-            "message": result
+            "message": "Roadmap generated and saved successfully",
+            "data": roadmap_data
         }
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
     except Exception as e:
         logger.error(f"Error generating roadmap: {e}")
         raise HTTPException(status_code=500, detail=str(e))

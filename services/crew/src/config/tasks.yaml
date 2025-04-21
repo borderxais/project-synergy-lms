@@ -14,14 +14,67 @@ reporting_task:
 
 roadmap_task:
   description: >
-    Generate a personalized roadmap for the college application process using ONLY the provided input parameters. Do not make up or guess any information.
+    Generate a personalized college application roadmap for a student based on their profile and target schools.
     
-    Use the exact user_id provided in the inputs: {user_id}
-    Use the exact target_schools provided in the inputs: {target_schools}
-    Use the student_profile data provided in the inputs to understand the student's background, interests, and academic information.
+    INPUTS:
+    - User ID: {user_id} - Use this exact ID to identify the student
+    - Target Schools: {target_schools} - List of colleges the student is applying to
+    - Student Profile Data: Academic information (GPA, grade level, test scores), interests, and preferences
     
-    The FirestoreRoadmapTool will handle fetching any additional data needed and updating the database. Do not attempt to use hardcoded or sample user IDs.
-  expected_output: "A detailed roadmap with tasks, deadlines, and priorities for the college application process."
+    CONSIDERATIONS:
+    - Application deadlines for each target school
+    - Student's current academic standing and test preparation needs
+    - Balance between common tasks (applicable to all schools) and school-specific tasks
+    - Progressive scheduling that distributes work evenly and prioritizes earlier deadlines
+    - Student's interests and study style preferences when making recommendations
+    - Assign appropriate priority levels (high/medium/low) to tasks based on urgency and importance
+    
+    RECOMMENDATION PRIORITIES:
+    Assign priorities to recommendations based on these factors:
+    - HIGH priority: Critical actions needed immediately (low GPA for target schools, missing required tests, approaching deadlines)
+    - MEDIUM priority: Important actions that will significantly improve chances (extracurricular enhancements, essay preparation)
+    - LOW priority: Helpful suggestions that would be beneficial but not critical
+    
+    The FirestoreRoadmapTool will handle fetching any additional data needed and updating the database.
+    Do not attempt to use hardcoded or sample user IDs.
+  expected_output: >
+    A JSON object containing:
+    1. A list of tasks, where each task includes EXACTLY these field names:
+       - "id": A unique identifier (can be a string like "task_1")
+       - "title": A concise task title
+       - "description": A detailed description of what needs to be done
+       - "dueDate": In YYYY-MM-DD format
+       - "category": One of "Application", "Test Prep", "Essay", "Financial Aid", "Research"
+       - "priority": One of "high", "medium", "low"
+       - "school": The specific school or "All Schools" if applicable to all
+    
+    2. A list of recommendations, where each recommendation includes EXACTLY these field names:
+       - "text": The recommendation content
+       - "priority": One of "high", "medium", "low"
+    
+    Example format:
+    {
+      "tasks": [
+        {
+          "id": "task_1",
+          "title": "Complete SAT Preparation",
+          "description": "Study for the SAT using practice tests and review materials",
+          "dueDate": "2025-05-15",
+          "category": "Test Prep",
+          "priority": "high",
+          "school": "All Schools"
+        }
+      ],
+      "recommendations": [
+        {
+          "text": "Join academic clubs to enhance your extracurricular profile",
+          "priority": "medium"
+        }
+      ]
+    }
+    
+    Tasks should be logically sequenced with earlier deadlines for preparation activities
+    and appropriate spacing to avoid overwhelming the student.
   agent: "roadmap_generator"
   max_retries: 3
   retry_on_fail: true

@@ -356,15 +356,15 @@ const HomeDashboardPage: React.FC = () => {
       <DashboardHeader studentData={studentData} userEmail={user?.email} />
       
       {/* Main content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ maxWidth: "90%" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Current Courses Section */}
           <div className="lg:col-span-1">
             <CurrentCourses courses={courses} />
           </div>
           
           {/* Weekly Schedule Section */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <WeeklySchedule 
               schedule={schedule} 
               onScheduleItemClick={handleScheduleItemClick} 
