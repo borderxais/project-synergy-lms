@@ -8,6 +8,8 @@ from firebase_admin import credentials, firestore
 from pathlib import Path
 import traceback
 from google.cloud.firestore_v1.transforms import Sentinel
+from google.cloud.firestore_v1.field_path import FieldPath
+
 
 def replace_sentinel_strings(obj):
     """Recursively replace Sentinel string or actual sentinel object with Firestore server timestamp."""
@@ -480,12 +482,16 @@ class FirestoreClient:
         """Get a college by name."""
         try:
             # Query for school with matching name
-            query = self.db.collection('US-Colleges').where('schoolName', '==', school_name)
-            schools = list(query.stream())
+            # query = self.db.collection('US-Colleges').where('schoolName', '==', school_name)
+            logger.info(f"Querying for school with name: {school_name}")
+            # query = self.db.collection('US-Colleges').where('University Name', '==', school_name)
+            school_ref = self.db.collection('US-Colleges').document(school_name)
+            school = school_ref.get()
+            logger.info(f"Schools found: {school}")
             
-            if schools:
-                school_data = schools[0].to_dict()
-                school_data['id'] = schools[0].id
+            if school:
+                school_data = school.to_dict()
+                school_data['id'] = school.id
                 return school_data
             
             logger.warning(f"College not found with name: {school_name}")
