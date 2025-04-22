@@ -11,21 +11,63 @@ interface DreamSchoolsProps {
 // Define the school statistics interface
 interface SchoolStatistics {
   name: string;
+  // Old format fields
   acceptanceRate?: number;
-  averageGPA?: number | { weighted: string; unweighted: string }; // handle both possibilities
+  averageGPA?: number | { weighted: string; unweighted: string }; 
   averageSAT?: string;
   averageACT?: string;
-  TOEFL?: {
-    required?: string;
-    minimumScore?: number;
-  };
+  
+  // New format fields
   ACT?: {
     avg_score?: string;
     required?: string;
-  };
+  } | string; // Support both object and string format
+  
   SAT?: {
     avg_score?: string;
     required?: string;
+    Math?: string;
+    Reading?: string;
+    Total?: string;
+  };
+  
+  GPA?: {
+    "2.50–2.99"?: string;
+    "3.00–3.24"?: string;
+    "3.25–3.49"?: string;
+    "3.50–3.74"?: string;
+    "3.75+"?: string;
+  };
+  
+  Deadlines?: {
+    "Early Decision"?: string;
+    "Early Action"?: string;
+    "Regular"?: string;
+  };
+  
+  "Acceptance Rate"?: {
+    Admitted?: string;
+    Enrolled?: string;
+    Rate?: string;
+    "Total Applicants"?: string;
+  };
+  
+  "Application Requirements"?: {
+    "College Prep Courses"?: string;
+    "High School GPA"?: string;
+    "High School Rank"?: string;
+    Recommendations?: string;
+    "SAT/ACT Scores"?: string;
+  };
+  
+  College_Board_Admissions_URL?: string;
+  IPEDS?: number | string;
+  "University Name"?: string;
+  
+  // Common fields for both formats
+  TOEFL?: {
+    required?: string;
+    minimumScore?: number;
   };
   topMajors?: string[];
   historicalTrends?: {
@@ -295,32 +337,62 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
                     <div className="space-y-4">
                         <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Key Statistics</h4>
                         
-                        {/* Acceptance Rate */}
+                        {/* Acceptance Rate - Support both formats */}
                         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <div className="text-sm text-gray-500 mb-1">Acceptance Rate</div>
                         <div className="text-xl font-bold text-blue-700">
-                            {school.acceptanceRate ? `${school.acceptanceRate}` : 'N/A'}
+                            {school["Acceptance Rate"]?.Rate 
+                                ? school["Acceptance Rate"].Rate 
+                                : (school.acceptanceRate ? `${school.acceptanceRate}` : 'N/A')}
                         </div>
+                        {school["Acceptance Rate"]?.["Total Applicants"] && (
+                            <div className="text-xs text-gray-500 mt-1">
+                                Applicants: {school["Acceptance Rate"]["Total Applicants"]}
+                            </div>
+                        )}
                         </div>
 
-                        {/* Average GPA */}
+                        {/* Average GPA - Support both formats */}
                         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <div className="text-sm text-gray-500 mb-1">Average GPA</div>
                         <div className="text-xl font-bold text-blue-700">
-                            {school.averageGPA && typeof school.averageGPA === 'object'
-                            ? (
-                                <div>
-                                    <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">Weighted:</span>
-                                    <span className="text-lg">{parseFloat(school.averageGPA.weighted).toFixed(1)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">Unweighted:</span>
-                                    <span className="text-lg">{parseFloat(school.averageGPA.unweighted).toFixed(1)}</span>
-                                    </div>
+                            {school.GPA ? (
+                                <div className="space-y-1">
+                                    {school.GPA["3.75+"] && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">3.75+:</span>
+                                            <span className="text-lg">{school.GPA["3.75+"]}</span>
+                                        </div>
+                                    )}
+                                    {school.GPA["3.50–3.74"] && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">3.50–3.74:</span>
+                                            <span className="text-lg">{school.GPA["3.50–3.74"]}</span>
+                                        </div>
+                                    )}
+                                    {school.GPA["3.25–3.49"] && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">3.25–3.49:</span>
+                                            <span className="text-lg">{school.GPA["3.25–3.49"]}</span>
+                                        </div>
+                                    )}
                                 </div>
-                                )
-                            : 'N/A'}
+                            ) : (
+                                school.averageGPA && typeof school.averageGPA === 'object'
+                                ? (
+                                    <div>
+                                        <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">Weighted:</span>
+                                        <span className="text-lg">{parseFloat(school.averageGPA.weighted).toFixed(1)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">Unweighted:</span>
+                                        <span className="text-lg">{parseFloat(school.averageGPA.unweighted).toFixed(1)}</span>
+                                        </div>
+                                    </div>
+                                    )
+                                : 'N/A'
+                            )}
                         </div>
                         </div>
                     </div>
@@ -329,75 +401,127 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
                     <div className="space-y-4">
                         <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Test Scores</h4>
 
-                        {/* SAT Score */}
-                        {school.SAT?.avg_score && (
+                        {/* SAT Score - Support both formats */}
                         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="text-sm text-gray-500 mb-1">Average SAT</div>
-                            <div className="text-xl font-bold text-blue-700">{school.SAT.avg_score}</div>
-                            {school.SAT.required && <div className="text-xs text-gray-500 mt-1">Required: {school.SAT.required}</div>}
+                            <div className="text-sm text-gray-500 mb-1">SAT</div>
+                            {school.SAT ? (
+                                <div className="space-y-1">
+                                    {school.SAT.Total && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Total:</span>
+                                            <span className="text-lg font-bold text-blue-700">{school.SAT.Total}</span>
+                                        </div>
+                                    )}
+                                    {school.SAT.Math && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Math:</span>
+                                            <span className="text-lg">{school.SAT.Math}</span>
+                                        </div>
+                                    )}
+                                    {school.SAT.Reading && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Reading:</span>
+                                            <span className="text-lg">{school.SAT.Reading}</span>
+                                        </div>
+                                    )}
+                                    {school.SAT.required && (
+                                        <div className="text-xs text-gray-500 mt-1">Required: {school.SAT.required}</div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-xl font-bold text-blue-700">{school.averageSAT || 'N/A'}</div>
+                            )}
                         </div>
-                        )}
 
-                        {/* ACT Score */}
-                        {school.ACT?.avg_score && (
+                        {/* ACT Score - Support both formats */}
                         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="text-sm text-gray-500 mb-1">Average ACT</div>
-                            <div className="text-xl font-bold text-blue-700">{school.ACT.avg_score}</div>
-                            {school.ACT.required && <div className="text-xs text-gray-500 mt-1">Required: {school.ACT.required}</div>}
+                            <div className="text-sm text-gray-500 mb-1">ACT</div>
+                            {typeof school.ACT === 'object' && school.ACT ? (
+                                <div>
+                                    <div className="text-xl font-bold text-blue-700">{school.ACT.avg_score || 'N/A'}</div>
+                                    {school.ACT.required && <div className="text-xs text-gray-500 mt-1">Required: {school.ACT.required}</div>}
+                                </div>
+                            ) : (
+                                <div className="text-xl font-bold text-blue-700">{typeof school.ACT === 'string' ? school.ACT : (school.averageACT || 'N/A')}</div>
+                            )}
                         </div>
-                        )}
-
-                        {/* TOEFL Minimum Score */}
-                        {school.TOEFL?.minimumScore && (
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="text-sm text-gray-500 mb-1">Minimum TOEFL Score</div>
-                            <div className="text-xl font-bold text-blue-700">{school.TOEFL.minimumScore}</div>
-                            {school.TOEFL.required && <div className="text-xs text-gray-500 mt-1">Required: {school.TOEFL.required}</div>}
-                        </div>
-                        )}
                     </div>
 
-                    {/* Financial & General Info Column */}
+                    {/* Additional Information Column */}
                     <div className="space-y-4">
-                        <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Financial & General Info</h4>
-
-                        {/* Student-Faculty Ratio */}
-                        {school.studentFacultyRatio && (
+                        <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Deadlines & Requirements</h4>
+                        
+                        {/* Deadlines - Support both formats */}
                         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="text-sm text-gray-500 mb-1">Student-Faculty Ratio</div>
-                            <div className="text-xl font-bold text-blue-700">{school.studentFacultyRatio}</div>
-                        </div>
-                        )}
-
-                        {/* Tuition (In-State & Out-State) */}
-                        {(school.tuitionInState || school.tuitionOutState) && (
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="text-sm text-gray-500 mb-1">Tuition</div>
-                            <div className="space-y-1">
-                            {school.tuitionInState && (
-                                <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">In-State:</span>
-                                <span className="font-semibold text-blue-700">{school.tuitionInState}</span>
+                            <div className="text-sm text-gray-500 mb-1">Application Deadlines</div>
+                            {school.Deadlines ? (
+                                <div className="space-y-1">
+                                    {school.Deadlines.Regular && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Regular:</span>
+                                            <span className="text-lg">{school.Deadlines.Regular}</span>
+                                        </div>
+                                    )}
+                                    {school.Deadlines["Early Action"] && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Early Action:</span>
+                                            <span className="text-lg">{school.Deadlines["Early Action"]}</span>
+                                        </div>
+                                    )}
+                                    {school.Deadlines["Early Decision"] && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Early Decision:</span>
+                                            <span className="text-lg">{school.Deadlines["Early Decision"]}</span>
+                                        </div>
+                                    )}
                                 </div>
+                            ) : (
+                                <div className="text-lg font-medium text-gray-700">Not available</div>
                             )}
-                            {school.tuitionOutState && (
-                                <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">Out-of-State:</span>
-                                <span className="font-semibold text-blue-700">{school.tuitionOutState}</span>
+                        </div>
+                        
+                        {/* Application Requirements */}
+                        {school["Application Requirements"] && (
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                                <div className="text-sm text-gray-500 mb-1">Requirements</div>
+                                <div className="space-y-1">
+                                    {school["Application Requirements"]["College Prep Courses"] && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">College Prep:</span>
+                                            <span className="text-sm">{school["Application Requirements"]["College Prep Courses"]}</span>
+                                        </div>
+                                    )}
+                                    {school["Application Requirements"]["High School GPA"] && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">GPA:</span>
+                                            <span className="text-sm">{school["Application Requirements"]["High School GPA"]}</span>
+                                        </div>
+                                    )}
+                                    {school["Application Requirements"]["SAT/ACT Scores"] && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Test Scores:</span>
+                                            <span className="text-sm">{school["Application Requirements"]["SAT/ACT Scores"]}</span>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
                             </div>
-                        </div>
                         )}
-
-                        {/* Scholarship Availability */}
-                        {school.scholarshipsAvailable !== undefined && (
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="text-sm text-gray-500 mb-1">Scholarships Available</div>
-                            <div className="text-xl font-bold text-blue-700">
-                            {school.scholarshipsAvailable ? <span className="text-green-600">Yes</span> : <span className="text-red-600">No</span>}
+                        
+                        {/* College Board URL */}
+                        {school.College_Board_Admissions_URL && (
+                            <div className="mt-2">
+                                <a 
+                                    href={school.College_Board_Admissions_URL} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                                >
+                                    <span>View on College Board</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </a>
                             </div>
-                        </div>
                         )}
                     </div>
                     </div>
