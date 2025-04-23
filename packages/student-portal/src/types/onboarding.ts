@@ -30,6 +30,7 @@ export interface HighSchoolProfile {
   studyStylePreference?: string[];
   currentClasses?: string[];
   extracurriculars?: string[];
+  testScores?: TestScore[];
 }
 
 export interface TargetSchool {

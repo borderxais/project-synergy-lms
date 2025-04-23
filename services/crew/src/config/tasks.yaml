@@ -9,7 +9,19 @@ reporting_task:
   description: >
     Using the refined college list and the student's academic interests {student_interests}, compile a detailed college application recommendation report. Clearly outline the top 10 colleges the student should consider applying to, with specific justifications for each recommendation based on fit, competitiveness, and alignment with the student's goals.
   expected_output: >
-    A JSON-formatted recommendation report containing the top 10 colleges, where each college entry includes the name and reason for recommendation.
+    A Python list of recommendation report objects containing the top 10 colleges, where each college entry includes the name and reason for recommendation.
+    Example format:
+    [
+      {
+        "College_Name": "College A",
+        "Reason": "Reason for recommendation"
+      },
+      {
+        "College_Name": "College B",
+        "Reason": "Reason for recommendation"
+      },
+      ...
+    ]
   agent: college_admission_advisor
 
 roadmap_task:

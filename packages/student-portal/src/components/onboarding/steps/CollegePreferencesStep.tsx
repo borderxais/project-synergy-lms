@@ -6,6 +6,8 @@ interface CollegePreferencesStepProps {
   formData: CollegePreferences;
   updateFormData: (data: CollegePreferences) => void;
   errors?: Record<string, string>;
+  recommendations?: any[];
+  isLoadingRecommendations?: boolean;
 }
 
 const COLLEGE_CATEGORIES = [
@@ -20,7 +22,7 @@ const COLLEGE_CATEGORIES = [
   { id: 'uc', label: 'UC System', description: 'University of California campuses' },
 ];
 
-export function CollegePreferencesStep({ formData, updateFormData, errors = {} }: CollegePreferencesStepProps) {
+export function CollegePreferencesStep({ formData, updateFormData, errors = {}, recommendations = [], isLoadingRecommendations = false }: CollegePreferencesStepProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
@@ -48,7 +50,7 @@ export function CollegePreferencesStep({ formData, updateFormData, errors = {} }
     });
   };
 
-  const handleSchoolSelect = (school: College) => {
+  const handleSchoolSelect = (school: College | { name: string }) => {
     const currentSchools = formData.targetSchools || [];
     if (!currentSchools.includes(school.name)) {
       handleUpdate('targetSchools', [...currentSchools, school.name]);
@@ -92,6 +94,35 @@ export function CollegePreferencesStep({ formData, updateFormData, errors = {} }
           Tell us about your target schools and preferences
         </p>
       </div>
+
+      {/* Recommendations Section */}
+      {isLoadingRecommendations ? (
+        <div className="p-4 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Loading recommendations...</p>
+        </div>
+      ) : recommendations.length > 0 ? (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900">Recommended Schools</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {recommendations.map((school: any, index: number) => (
+              <div key={index} className="p-4 border rounded-lg bg-blue-50 border-blue-200">
+                <h4 className="font-medium text-blue-900">{school.name}</h4>
+                {school.reason && (
+                  <p className="mt-1 text-sm text-blue-700">{school.reason}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleSchoolSelect({ name: school.name })}
+                  className="mt-2 text-sm text-blue-600 hover:text-blue-500"
+                >
+                  Add to list
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {/* Target Schools Section */}
       <div className="space-y-4">

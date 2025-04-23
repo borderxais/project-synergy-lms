@@ -8,16 +8,24 @@ import { InterestsStep } from "../components/onboarding/steps/InterestsStep";
 import { CollegePreferencesStep } from "../components/onboarding/steps/CollegePreferencesStep";
 import { useAuth } from "../hooks/useAuth";
 import { API_SERVICE_URL } from "../config";
-import { OnboardingFormData } from "../types/onboarding";
+import { OnboardingFormData, Gender, SchoolType, TestType, TestScore } from "../types/onboarding";
 
-const DEFAULT_FORM_DATA: OnboardingFormData = {
+interface User {
+  id: string;
+}
+
+interface ExtendedOnboardingFormData extends OnboardingFormData {
+  recommendations?: any[];
+}
+
+const DEFAULT_FORM_DATA: ExtendedOnboardingFormData = {
   generalInfo: {
     firstName: '',
     lastName: '',
-    gender: 'PreferNotToSay',
+    gender: 'PreferNotToSay' as Gender,
     grade: 0,
     currentSchool: '',
-    schoolType: 'Public',
+    schoolType: 'Public' as SchoolType,
   },
   highSchoolProfile: {
     gpa: undefined,
@@ -39,6 +47,7 @@ const DEFAULT_FORM_DATA: OnboardingFormData = {
     earlyDecision: 'none',
   },
   errors: {},
+  recommendations: [],
 };
 
 export function OnboardingPage() {
@@ -46,9 +55,10 @@ export function OnboardingPage() {
   const { user, token } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<OnboardingFormData>(DEFAULT_FORM_DATA);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [formData, setFormData] = useState<ExtendedOnboardingFormData>(DEFAULT_FORM_DATA);
 
-  const updateFormData = (updates: Partial<OnboardingFormData>) => {
+  const updateFormData = (updates: Partial<ExtendedOnboardingFormData>) => {
     setFormData((prevData) => ({
       ...prevData,
       ...updates,
@@ -68,7 +78,7 @@ export function OnboardingPage() {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Validate current step
     const errors: Record<string, string> = {};
     
@@ -97,6 +107,43 @@ export function OnboardingPage() {
     if (Object.keys(errors).length > 0) {
       updateFormData({ errors });
       return;
+    }
+
+    // If we're on the HighSchoolProfile step and moving to next step
+    if (currentStep === 3 && isHighSchoolStudent()) {
+      try {
+        setIsGenerating(true);
+        const response = await fetch(`${API_SERVICE_URL}/api/recommendations`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId: user?.uid,
+            gpa: formData.highSchoolProfile?.gpa,
+            interests: formData.interests || [],
+            sat: formData.highSchoolProfile?.testScores?.find((test: TestScore) => test.testType === 'SAT')?.score,
+            act: formData.highSchoolProfile?.testScores?.find((test: TestScore) => test.testType === 'ACT')?.score,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to generate recommendations');
+        }
+
+        const recommendations = await response.json();
+        // Store recommendations in form data if needed
+        updateFormData({ recommendations });
+      } catch (error) {
+        console.error('Error generating recommendations:', error);
+        updateFormData({ 
+          errors: { recommendations: 'Failed to generate recommendations. Please try again.' }
+        });
+        return;
+      } finally {
+        setIsGenerating(false);
+      }
     }
 
     // Clear errors and proceed
@@ -172,24 +219,6 @@ export function OnboardingPage() {
           />
         );
       case 2:
-        if (isHighSchoolStudent()) {
-          return (
-            <HighSchoolStep
-              formData={formData.highSchoolProfile!}
-              updateFormData={(data) => updateFormData({ highSchoolProfile: data })}
-              errors={formData.errors}
-            />
-          );
-        } else {
-          return (
-            <MiddleSchoolStep
-              formData={formData.middleSchoolTarget!}
-              updateFormData={(data) => updateFormData({ middleSchoolTarget: data })}
-              errors={formData.errors}
-            />
-          );
-        }
-      case 3:
         return (
           <InterestsStep
             interests={formData.interests || []}
@@ -197,6 +226,22 @@ export function OnboardingPage() {
             errors={formData.errors || {}}
           />
         );
+      case 3:
+        if (isHighSchoolStudent()) {
+          return (
+            <HighSchoolStep
+              formData={formData.highSchoolProfile || {}}
+              updateFormData={(data) => updateFormData({ highSchoolProfile: data })}
+            />
+          );
+        } else {
+          return (
+            <MiddleSchoolStep
+              formData={formData.middleSchoolTarget || {}}
+              updateFormData={(data) => updateFormData({ middleSchoolTarget: data })}
+            />
+          );
+        }
       case 4:
         if (isHighSchoolStudent()) {
           return (
@@ -220,6 +265,7 @@ export function OnboardingPage() {
       onNext={currentStep === getTotalSteps() ? handleSubmit : handleNext}
       onBack={handleBack}
       isSubmitting={isSubmitting}
+      isGenerating={isGenerating}
     >
       {renderStep()}
     </OnboardingLayout>

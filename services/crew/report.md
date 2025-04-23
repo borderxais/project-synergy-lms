@@ -1,46 +1,42 @@
-```json
-{
-  "recommendations": [
-    {
-      "name": "University of Chicago",
-      "reason": "Renowned for its rigorous academic environment and exceptional Economics program, the University of Chicago offers a strong foundation for students pursuing business and economics, encouraging critical thinking and analytical skills."
-    },
-    {
-      "name": "University of Pennsylvania",
-      "reason": "Home to the Wharton School, one of the top business schools globally, UPenn provides unparalleled resources and networking opportunities in business and economics, making it an ideal choice for aspiring leaders."
-    },
-    {
-      "name": "New York University",
-      "reason": "NYU's Stern School of Business offers a unique urban campus located in the heart of New York City, providing students with extensive internship and job opportunities in a global financial hub."
-    },
-    {
-      "name": "University of California, Berkeley",
-      "reason": "Known for its exceptional business and economics programs, UC Berkeley also offers a diverse environment and access to Silicon Valley, enhancing learning through real-world applications."
-    },
-    {
-      "name": "Duke University",
-      "reason": "Duke's Fuqua School of Business is consistently ranked among the best, providing strong business education with a collaborative environment, making it perfect for students looking to excel in both business and economics."
-    },
-    {
-      "name": "Northwestern University",
-      "reason": "Northwestern's Kellogg School of Management emphasizes experiential learning, and its strong economics department supports interdisciplinary learning, giving students a well-rounded education."
-    },
-    {
-      "name": "University of Michigan-Ann Arbor",
-      "reason": "With a highly regarded Ross School of Business, Michigan offers a robust undergraduate business program and extensive resources for research and networking in economics and business."
-    },
-    {
-      "name": "Columbia University",
-      "reason": "Columbia's close ties to Wall Street provide students with unique internship opportunities and a rigorous curriculum in business and economics, preparing them for high-stakes environments."
-    },
-    {
-      "name": "University of Southern California",
-      "reason": "USC's Marshall School of Business blends academic rigor with industry involvement, offering not only education but also extensive networking opportunities in one of the largest economies in the U.S."
-    },
-    {
-      "name": "Georgetown University",
-      "reason": "Georgetown's McDonough School of Business is well-known for its strong emphasis on ethics and global business, positioning students to thrive in various economic sectors."
-    }
-  ]
-}
-```
+[
+  {
+    "College_Name": "New York University",
+    "Reason": "NYU's Tisch School of the Arts is renowned for its outstanding theater and music programs, offering extensive networking opportunities in the heart of New York City."
+  },
+  {
+    "College_Name": "University of Southern California",
+    "Reason": "USC's School of Dramatic Arts and the Thornton School of Music provide unique interdisciplinary opportunities, and its strong connection to the entertainment industry makes it a prime choice for aspiring artists."
+  },
+  {
+    "College_Name": "Cornell University",
+    "Reason": "Cornell offers a robust arts program with a strong emphasis on interdisciplinary education, coupled with an impressive Theater department that encourages creative collaboration."
+  },
+  {
+    "College_Name": "Oberlin College",
+    "Reason": "Known for its conservatory of music and strong emphasis on the liberal arts, Oberlin fosters a creative environment that's ideal for students passionate about arts and drama."
+  },
+  {
+    "College_Name": "Rhode Island School of Design",
+    "Reason": "RISD is one of the best art schools in the country, renowned for its art and design programs, which are crucial for students looking to delve into the visual aspects of theater and performance."
+  },
+  {
+    "College_Name": "Vanderbilt University",
+    "Reason": "Vanderbilt's fine arts program and strong commitment to interdisciplinary studies provide an excellent platform for students interested in both theater and music."
+  },
+  {
+    "College_Name": "Emory University",
+    "Reason": "Emory's Theater Studies program is highly respected, and the university's cultural offerings greatly enhance the academic experience for those pursuing arts and performance."
+  },
+  {
+    "College_Name": "Wesleyan University",
+    "Reason": "Wesleyan is known for its strong social justice orientation in arts education, and its Theater Arts program emphasizes creativity and collaboration among students."
+  },
+  {
+    "College_Name": "George Washington University",
+    "Reason": "GWU offers strong programs in both theater and music within a vibrant urban environment, providing students with numerous performance opportunities."
+  },
+  {
+    "College_Name": "University of California-Los Angeles",
+    "Reason": "UCLA's School of Theater, Film and Television is highly prestigious, and it benefits from its location in Los Angeles, the heart of the entertainment industry, which offers invaluable internships and collaboration opportunities."
+  }
+]
