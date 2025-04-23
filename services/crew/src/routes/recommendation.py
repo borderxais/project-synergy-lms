@@ -92,23 +92,18 @@ async def get_college_recommendations(request: Request):
             else:
                 logger.warning(f"Skipping invalid recommendation: {rec}")
 
-        # Convert to JSON string for storage
-        recommendations_json = json.dumps(validated_recommendations)
-
         # Prepare data for storage
         current_time = datetime.now().isoformat()
-        recommendation_data = {
-            'collegeRecommendations': {
-                'content': recommendations_json,  # Store the validated JSON string
-                'generatedAt': current_time,
-                'inputs': {
-                    'gpa': data.get('gpa'),
-                    'sat': data.get('sat'),
-                    'act': data.get('act'),
-                    'interests': data.get('interests', [])
-                }
+        recommendation_data = {'collegeRecommendations': {
+            'recommendations_list': validated_recommendations,  # Store the array directly
+            'generatedAt': current_time,
+            'inputs': {
+                'gpa': data.get('gpa'),
+                'sat': data.get('sat'),
+                'act': data.get('act'),
+                'interests': data.get('interests', [])
             }
-        }
+        }}
 
         # Save to Firestore
         logger.info(f"Saving recommendations to Firestore for user {user_id}")
@@ -122,8 +117,7 @@ async def get_college_recommendations(request: Request):
         
         return {
             "success": True,
-            "content": recommendations_json,  # Return the validated JSON string
-            "recommendations": validated_recommendations  # Also return the parsed list for convenience
+            "recommendations": validated_recommendations  # Return the array directly
         }
     except HTTPException:
         raise
