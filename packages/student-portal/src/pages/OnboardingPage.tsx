@@ -56,6 +56,7 @@ export function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [hasLoadedRecommendations, setHasLoadedRecommendations] = useState(false);
   const [formData, setFormData] = useState<ExtendedOnboardingFormData>(DEFAULT_FORM_DATA);
 
   const updateFormData = (updates: Partial<ExtendedOnboardingFormData>) => {
@@ -109,10 +110,11 @@ export function OnboardingPage() {
       return;
     }
 
-    // If we're on the HighSchoolProfile step and moving to next step
+    // If we're on the HighSchoolProfile step, generate recommendations before proceeding
     if (currentStep === 3 && isHighSchoolStudent()) {
       try {
         setIsGenerating(true);
+        setHasLoadedRecommendations(false);
         const response = await fetch(`${API_SERVICE_URL}/api/recommendations`, {
           method: 'POST',
           headers: {
@@ -120,7 +122,7 @@ export function OnboardingPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            userId: user?.uid,
+            userId: user?.uid, // Firebase user ID
             gpa: formData.highSchoolProfile?.gpa,
             interests: formData.interests || [],
             sat: formData.highSchoolProfile?.testScores?.find((test: TestScore) => test.testType === 'SAT')?.score,
@@ -133,8 +135,12 @@ export function OnboardingPage() {
         }
 
         const recommendations = await response.json();
-        // Store recommendations in form data if needed
-        updateFormData({ recommendations });
+        // Store recommendations and proceed only after successful generation
+        console.log('Got recommendations:', recommendations.recommendations);
+        updateFormData({
+          recommendations: recommendations.recommendations,
+        });
+        setHasLoadedRecommendations(true);
       } catch (error) {
         console.error('Error generating recommendations:', error);
         updateFormData({ 
@@ -249,6 +255,7 @@ export function OnboardingPage() {
               formData={formData.collegePreferences!}
               updateFormData={(data) => updateFormData({ collegePreferences: data })}
               errors={formData.errors}
+              recommendations={formData.recommendations || []}
             />
           );
         }
