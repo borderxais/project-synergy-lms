@@ -103,7 +103,12 @@ export function CollegePreferencesStep({ formData, updateFormData, errors = {}, 
       {/* Recommendations Section */}
       {Array.isArray(recommendations) && recommendations.length > 0 ? (
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Recommended Schools</h3>
+          <div className="mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Recommended Schools</h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Based on your current GPA, SAT/ACT scores (if provided), and stated interests, our AI has recommended the following colleges for you.
+            </p>
+          </div>
           <div className="max-h-[400px] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
               {recommendations.map((school: CollegeRecommendation) => (
