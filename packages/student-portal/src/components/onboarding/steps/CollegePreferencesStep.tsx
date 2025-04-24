@@ -104,22 +104,24 @@ export function CollegePreferencesStep({ formData, updateFormData, errors = {}, 
       {Array.isArray(recommendations) && recommendations.length > 0 ? (
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900">Recommended Schools</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {recommendations.map((school: CollegeRecommendation) => (
-              <div key={school.College_Name} className="p-4 border rounded-lg bg-blue-50 border-blue-200">
-                <h4 className="font-medium text-blue-900">{school.College_Name}</h4>
-                {school.Reason && (
-                  <p className="mt-1 text-sm text-blue-700">{school.Reason}</p>
-                )}
-                <button
-                  type="button"
-                  onClick={() => handleSchoolSelect({ name: school.College_Name })}
-                  className="mt-2 text-sm text-blue-600 hover:text-blue-500"
-                >
-                  Add to list
-                </button>
-              </div>
-            ))}
+          <div className="max-h-[400px] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+              {recommendations.map((school: CollegeRecommendation) => (
+                <div key={school.College_Name} className="p-4 border rounded-lg bg-blue-50 border-blue-200 hover:shadow-md transition-shadow">
+                  <h4 className="font-medium text-blue-900">{school.College_Name}</h4>
+                  {school.Reason && (
+                    <p className="mt-1 text-sm text-blue-700">{school.Reason}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleSchoolSelect({ name: school.College_Name })}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-500 hover:underline"
+                  >
+                    Add to list
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       ) : null}
