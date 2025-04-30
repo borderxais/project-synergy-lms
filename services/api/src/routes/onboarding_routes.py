@@ -99,6 +99,7 @@ async def submit_onboarding(request: Request, token: Dict = Depends(verify_token
                 "generalInfo": onboarding_data.get("generalInfo", {}),
                 "highSchoolProfile": onboarding_data.get("highSchoolProfile", {}),
                 "interests": onboarding_data.get("interests", []),
+                "academicInterests": onboarding_data.get("academicInterests", []),
                 "onboardingCompleted": True,
                 "lastUpdated": firestore.SERVER_TIMESTAMP
             },

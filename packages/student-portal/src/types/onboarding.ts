@@ -95,6 +95,7 @@ export interface OnboardingFormData {
   highSchoolProfile?: HighSchoolProfile;
   middleSchoolTarget?: MiddleSchoolTarget;
   interests?: string[];
+  academicInterests?: string[];
   collegePreferences?: CollegePreferences;
   errors?: Record<string, string>;
 }
