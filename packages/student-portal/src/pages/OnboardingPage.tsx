@@ -6,6 +6,8 @@ import { HighSchoolStep } from "../components/onboarding/steps/HighSchoolStep";
 import { MiddleSchoolStep } from "../components/onboarding/steps/MiddleSchoolStep";
 import { InterestsStep } from "../components/onboarding/steps/InterestsStep";
 import { CollegePreferencesStep } from "../components/onboarding/steps/CollegePreferencesStep";
+import { GeneratingRecommendationsPage } from "../components/onboarding/GeneratingRecommendationsPage";
+import { LoadingPage } from "../components/onboarding/LoadingPage";
 import { useAuth } from "../hooks/useAuth";
 import { API_SERVICE_URL } from "../config";
 import { OnboardingFormData, Gender, SchoolType, TestType, TestScore } from "../types/onboarding";
@@ -266,14 +268,27 @@ export function OnboardingPage() {
     }
   };
 
+  if (isSubmitting) {
+    return (
+      <LoadingPage
+        title="Submitting Your Profile"
+        description="We're saving your information and preparing your personalized learning experience."
+      />
+    );
+  }
+
+  if (isGenerating) {
+    return <GeneratingRecommendationsPage />;
+  }
+
   return (
     <OnboardingLayout
       currentStep={currentStep}
       totalSteps={getTotalSteps()}
       onNext={currentStep === getTotalSteps() ? handleSubmit : handleNext}
       onBack={handleBack}
-      isSubmitting={isSubmitting}
-      isGenerating={isGenerating}
+      isSubmitting={false}
+      isGenerating={false}
     >
       {renderStep()}
     </OnboardingLayout>
