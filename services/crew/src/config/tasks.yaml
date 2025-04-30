@@ -1,6 +1,6 @@
 matching_task:
   description: >
-    Review the filtered list of colleges returned by the Firestore tool by inputing GPA: {student_GPA}, SAT: {student_sat}, ACT: {student_act}. If any field is None then ignore it. Use your own reasoning and knowledge of admissions to re-evaluate the results based on the student's profile GPA: {student_GPA}, SAT: {student_sat}, ACT: {student_act}, Interests: {student_interests}. Refine the list to include up to 20 institutions where the student is most likely to be a good fit. If fewer than 20 colleges are available from the initial filtered list, include them all.
+    Review the filtered list of colleges returned by the Firestore tool by inputing GPA: {student_GPA}, SAT: {student_sat}, ACT: {student_act}. If any field is None then ignore it. Use your own reasoning and knowledge of admissions to re-evaluate the results based on the student's profile GPA: {student_GPA}, SAT: {student_sat}, ACT: {student_act}, Interests: {student_interests}. Refine the list to include up to 20 institutions where the student is most likely to be a good fit. If fewer than 20 colleges are available from the initial filtered list, include them all. Please only include colleges that are in the initial filtered list.
   expected_output: >
     A refined, prioritized python list of up to 20 recommended colleges based on deeper analysis of the filtered set, aligned with the student's academic performance.
   agent: student_data_matcher

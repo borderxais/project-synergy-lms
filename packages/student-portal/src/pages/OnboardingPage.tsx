@@ -124,7 +124,7 @@ export function OnboardingPage() {
           body: JSON.stringify({
             userId: user?.uid, // Firebase user ID
             gpa: formData.highSchoolProfile?.gpa,
-            interests: formData.interests || [],
+            interests: [...(formData.interests || []), ...(formData.academicInterests || [])],
             sat: formData.highSchoolProfile?.testScores?.find((test: TestScore) => test.testType === 'SAT')?.score,
             act: formData.highSchoolProfile?.testScores?.find((test: TestScore) => test.testType === 'ACT')?.score,
           }),
@@ -228,7 +228,8 @@ export function OnboardingPage() {
         return (
           <InterestsStep
             interests={formData.interests || []}
-            onUpdate={(interests) => updateFormData({ interests })}
+            academicInterests={formData.academicInterests || []}
+            onUpdate={(interests, academicInterests) => updateFormData({ interests, academicInterests })}
             errors={formData.errors || {}}
           />
         );

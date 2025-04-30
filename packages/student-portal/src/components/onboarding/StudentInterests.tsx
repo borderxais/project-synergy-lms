@@ -1,5 +1,6 @@
 import React from 'react';
 import { StudentFormState } from '../../types/student';
+import { InterestsStep } from './steps/InterestsStep';
 
 const INTEREST_OPTIONS = [
   'Academic Clubs',
@@ -20,6 +21,10 @@ interface StudentInterestsProps {
 }
 
 export function StudentInterests({ formData, onUpdate }: StudentInterestsProps) {
+  const handleAcademicInterestsChange = (academicInterests: string[]) => {
+    onUpdate('academicInterests', academicInterests);
+  };
+
   const toggleInterest = (interest: string) => {
     const newInterests = formData.interests.includes(interest)
       ? formData.interests.filter((i) => i !== interest)
@@ -36,6 +41,16 @@ export function StudentInterests({ formData, onUpdate }: StudentInterestsProps) 
           journey.
         </p>
       </div>
+
+      <InterestsStep
+        interests={formData.interests}
+        academicInterests={formData.academicInterests || []}
+        onUpdate={(interests: string[], academicInterests: string[]) => {
+          onUpdate('interests', interests);
+          onUpdate('academicInterests', academicInterests);
+        }}
+        errors={formData.errors}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         {INTEREST_OPTIONS.map((interest) => (

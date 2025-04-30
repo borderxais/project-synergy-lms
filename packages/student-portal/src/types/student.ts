@@ -26,6 +26,7 @@ export interface Student {
 
   // Interests and Activities (from studentProfile.interests and extracurriculars)
   interests: string[];
+  academicInterests: string[];
   extracurriculars?: Array<{
     name: string;
     role?: string;
