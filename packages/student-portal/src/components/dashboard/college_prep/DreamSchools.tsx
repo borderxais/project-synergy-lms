@@ -570,48 +570,82 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
         </div>
       )}
 
+
       {/* Application Timeline */}
       <div className="bg-white rounded-lg p-6 shadow-sm">
         <h2 className="text-lg font-semibold mb-4">Application Timeline 申请时间线</h2>
         <div className="space-y-4">
-          {student.targetSchools.map((school, idx) => {
-            const tasks = student.roadmap.extracurricularGoals.filter(
-              goal => goal.title.includes(school)
-            );
+          {(() => {
+            type DeadlineInfo = {
+              type: string;
+              date: Date;
+            };
 
-            return tasks.length > 0 ? (
-              <div key={`timeline-${school}`} className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-medium mb-3">{school}</h3>
-                <div className="relative">
-                  <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                  <div className="space-y-4 ml-6">
-                    {tasks
-                      .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
-                      .map((task, taskIdx) => (
-                        <div key={`${task.title}-${taskIdx}`} className="relative">
+            const convertDeadlineToDate = (dateStr: string | undefined): Date | null => {
+              if (!dateStr) return null;
+              const [monthStr, dayStr] = dateStr.split(' ');
+              const currentYear = new Date().getFullYear();
+              try {
+                const dateObj = new Date(`${monthStr} ${dayStr}, ${currentYear}`);
+                if (isNaN(dateObj.getTime())) return null;
+                if (dateObj < new Date()) {
+                  dateObj.setFullYear(currentYear + 1);
+                }
+                return dateObj;
+              } catch {
+                return null;
+              }
+            };
+
+            const timelineItems = schoolStats.map((schoolStat) => {
+              if (!schoolStat.Deadlines) return null;
+
+              // Convert deadlines to date objects and sort them
+              const deadlines: DeadlineInfo[] = [
+                { type: 'Regular', date: convertDeadlineToDate(schoolStat.Deadlines.Regular) },
+                { type: 'Early Action', date: convertDeadlineToDate(schoolStat.Deadlines['Early Action']) },
+                { type: 'Early Decision', date: convertDeadlineToDate(schoolStat.Deadlines['Early Decision']) }
+              ]
+                .filter((d): d is DeadlineInfo => d.date !== null)
+                .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+              if (deadlines.length === 0) return null;
+
+              return (
+                <div key={`timeline-${schoolStat.name}`} className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium mb-3">{schoolStat.name}</h3>
+                  <div className="relative">
+                    <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                    <div className="space-y-4 ml-6">
+                      {deadlines.map((deadline, idx) => (
+                        <div key={`${deadline.type}-${idx}`} className="relative">
                           <div className="absolute -left-[1.625rem] top-2 w-3 h-3 rounded-full bg-blue-500"></div>
                           <div>
                             <div className="text-xs text-gray-500 mb-1">
-                              {new Date(task.deadline).toLocaleDateString()}
+                              {deadline.date.toLocaleDateString()}
                             </div>
-                            <div className={`text-sm ${task.tasks[0].completed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
-                              {task.title}
+                            <div className="text-sm text-gray-700">
+                              {deadline.type} Deadline
                             </div>
                           </div>
                         </div>
                       ))}
+                    </div>
                   </div>
                 </div>
+              );
+            });
+
+            const hasValidDeadlines = timelineItems.some(item => item !== null);
+            
+            return hasValidDeadlines ? (
+              <>{timelineItems}</>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-gray-500">No application deadlines available</p>
               </div>
-            ) : null;
-          })}
-          {!student.targetSchools.some(school => 
-            student.roadmap.extracurricularGoals.some(goal => goal.title.includes(school))
-          ) && (
-            <div className="text-center py-4">
-              <p className="text-gray-500">No application tasks scheduled yet</p>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
     </div>
