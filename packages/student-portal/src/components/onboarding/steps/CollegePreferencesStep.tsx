@@ -2,10 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CollegePreferences } from '../../../types/onboarding';
 import { COLLEGES, College } from '../../../data/colleges';
 
+interface CollegeRecommendation {
+  College_Name: string;
+  Reason: string;
+}
+
 interface CollegePreferencesStepProps {
   formData: CollegePreferences;
   updateFormData: (data: CollegePreferences) => void;
   errors?: Record<string, string>;
+  recommendations: CollegeRecommendation[];
 }
 
 const COLLEGE_CATEGORIES = [
@@ -20,7 +26,7 @@ const COLLEGE_CATEGORIES = [
   { id: 'uc', label: 'UC System', description: 'University of California campuses' },
 ];
 
-export function CollegePreferencesStep({ formData, updateFormData, errors = {} }: CollegePreferencesStepProps) {
+export function CollegePreferencesStep({ formData, updateFormData, errors = {}, recommendations }: CollegePreferencesStepProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
@@ -48,7 +54,7 @@ export function CollegePreferencesStep({ formData, updateFormData, errors = {} }
     });
   };
 
-  const handleSchoolSelect = (school: College) => {
+  const handleSchoolSelect = (school: College | { name: string }) => {
     const currentSchools = formData.targetSchools || [];
     if (!currentSchools.includes(school.name)) {
       handleUpdate('targetSchools', [...currentSchools, school.name]);
@@ -92,6 +98,38 @@ export function CollegePreferencesStep({ formData, updateFormData, errors = {} }
           Tell us about your target schools and preferences
         </p>
       </div>
+
+
+      {/* Recommendations Section */}
+      {Array.isArray(recommendations) && recommendations.length > 0 ? (
+        <div className="space-y-4">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Recommended Schools</h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Based on your current GPA, SAT/ACT scores (if provided), and stated interests, our AI has recommended the following colleges for you.
+            </p>
+          </div>
+          <div className="max-h-[400px] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+              {recommendations.map((school: CollegeRecommendation) => (
+                <div key={school.College_Name} className="p-4 border rounded-lg bg-blue-50 border-blue-200 hover:shadow-md transition-shadow">
+                  <h4 className="font-medium text-blue-900">{school.College_Name}</h4>
+                  {school.Reason && (
+                    <p className="mt-1 text-sm text-blue-700">{school.Reason}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleSchoolSelect({ name: school.College_Name })}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-500 hover:underline"
+                  >
+                    Add to list
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* Target Schools Section */}
       <div className="space-y-4">

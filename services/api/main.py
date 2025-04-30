@@ -9,8 +9,7 @@ auth_service_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../
 sys.path.append(auth_service_path)
 
 # Import routes
-# from src.routes import student_routes, school_routes, onboarding_routes
-from src.routes import student_routes, school_routes, onboarding_routes
+from src.routes import student_routes, school_routes, onboarding_routes, recommendation_routes
 
 # Configure logging
 logging.basicConfig(
@@ -39,6 +38,7 @@ app.add_middleware(
 app.include_router(student_routes.router, tags=["Students"])
 app.include_router(school_routes.router, tags=["Schools"])
 app.include_router(onboarding_routes.router, tags=["Onboarding"])
+app.include_router(recommendation_routes.router, tags=["Recommendations"])
 
 # Health check endpoint
 @app.get("/health", tags=["Health"])

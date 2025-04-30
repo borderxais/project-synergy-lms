@@ -7,6 +7,7 @@ interface OnboardingLayoutProps {
   onNext: () => void;
   onBack: () => void;
   isSubmitting?: boolean;
+  isGenerating?: boolean;
 }
 
 export function OnboardingLayout({
@@ -16,6 +17,7 @@ export function OnboardingLayout({
   onNext,
   onBack,
   isSubmitting = false,
+  isGenerating = false,
 }: OnboardingLayoutProps) {
   const progress = (currentStep / totalSteps) * 100;
 
@@ -63,11 +65,13 @@ export function OnboardingLayout({
             <button
               type="button"
               onClick={onNext}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isGenerating}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
               {isSubmitting
                 ? 'Submitting...'
+                : isGenerating
+                ? 'Generating...'
                 : currentStep === totalSteps
                 ? 'Submit'
                 : 'Next'}
