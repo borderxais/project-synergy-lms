@@ -3,10 +3,12 @@ from crewai.project import CrewBase, agent, crew, task
 import yaml
 import os
 from pathlib import Path
+from typing import Dict, Any
 
 from .tools.custom_tool import FirestoreAllCollegesTool
 from .tools.roadmap_tool import FirestoreRoadmapTool
 from .tools.error_handling_tool import ErrorHandlingTool
+from .models import RoadmapOutput, ReportOutput
 
 @CrewBase
 class LmsCrew:
@@ -66,7 +68,8 @@ class LmsCrew:
     def reporting_task(self) -> Task:
         return Task(
             config=self.tasks_config['reporting_task'],
-            output_file='report.md'
+            output_file='report.md',
+            output_parser=lambda x: ReportOutput.model_validate_json(x) if isinstance(x, str) else ReportOutput.model_validate(x)
         )
         
     @task
@@ -74,6 +77,7 @@ class LmsCrew:
         """Creates the roadmap generation task"""
         return Task(
             config=self.tasks_config['roadmap_task'],
+            output_parser=lambda x: RoadmapOutput.model_validate_json(x) if isinstance(x, str) else RoadmapOutput.model_validate(x)
         )
 
     @crew
