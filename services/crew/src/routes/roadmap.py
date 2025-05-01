@@ -6,6 +6,7 @@ from db.firestore_client import FirestoreClient
 from ..crew import LmsCrew
 from ..tools.roadmap_tool import sanitize_firebase_data
 from crewai import Crew, Process, CrewOutput
+from ..models import RoadmapOutput
 import json
 
 # Configure logging
@@ -90,21 +91,22 @@ async def generate_roadmap(request: Request):
         # Run only the roadmap task
         roadmap_result = roadmap_crew.kickoff(inputs=inputs)
 
-        # Proper CrewOutput handling
-        if isinstance(roadmap_result, CrewOutput):
-            # Access the raw output correctly
-            roadmap_data_str = roadmap_result.raw
-            
-            # Try parsing JSON if available
-            if roadmap_result.json_dict:
-                roadmap_data = roadmap_result.json_dict
-            else:
-                try:
-                    roadmap_data = json.loads(roadmap_data_str)
-                except json.JSONDecodeError:
-                    roadmap_data = {"error": "Failed to parse JSON output"}
+        # The result should already be a RoadmapOutput model due to the output_parser
+        if isinstance(roadmap_result, RoadmapOutput):
+            roadmap_data = roadmap_result.model_dump()
+        elif isinstance(roadmap_result, CrewOutput):
+            try:
+                # Try to parse the output into our model
+                if roadmap_result.json_dict:
+                    roadmap_data = RoadmapOutput.model_validate(roadmap_result.json_dict).model_dump()
+                else:
+                    roadmap_data = RoadmapOutput.model_validate_json(roadmap_result.raw).model_dump()
+            except Exception as e:
+                logger.error(f"Failed to parse roadmap output: {e}")
+                raise HTTPException(status_code=500, detail="Invalid roadmap format returned from agent")
         else:
-            roadmap_data = roadmap_result
+            logger.error(f"Unexpected roadmap result type: {type(roadmap_result)}")
+            raise HTTPException(status_code=500, detail="Invalid response from roadmap generation")
         
         logger.info(f"Processed roadmap data: {roadmap_data}")
         
