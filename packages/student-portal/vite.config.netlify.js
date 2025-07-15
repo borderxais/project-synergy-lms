@@ -15,8 +15,13 @@ export default defineConfig({
     },
   },
   css: {
-    // Disable PostCSS processing to avoid dependency issues
-    postcss: false
+    // Enable PostCSS processing but with inline minimal config
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer')
+      ]
+    }
   },
   // Skip TypeScript type checking to avoid errors from common package
   optimizeDeps: {
