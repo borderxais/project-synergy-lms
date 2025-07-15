@@ -1,5 +1,5 @@
 [build]
-  command = "cd packages/student-portal && npm install autoprefixer postcss tailwindcss postcss-import postcss-nested postcss-preset-env --save-dev && npm install && npm run build"
+  command = "cd packages/student-portal && npm install && npm install -D autoprefixer postcss tailwindcss postcss-import postcss-nested postcss-preset-env && npm run build"
   publish = "packages/student-portal/dist"
   functions = "netlify/functions"
 
