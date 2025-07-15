@@ -29,8 +29,9 @@ export default defineConfig({
     typescript: {
       transpileOnly: true,
     },
+    // Ensure CSS processing works properly
     cssCodeSplit: true,
-    minify: true,
+    cssMinify: true,
     rollupOptions: {
       onwarn(warning, warn) {
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
