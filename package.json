@@ -9,12 +9,14 @@
         "common"
     ],
     "scripts": {
-        "dev": "turbo run dev",
+        "build:student-portal": "npm install --workspace=@privschool-lms/student-portal && npm run build --workspace=@privschool-lms/student-portal",
         "build": "turbo run build",
-        "build:student-portal": "cd packages/student-portal && npm install --production=false && npm run build",
+        "dev": "turbo run dev",
         "lint": "turbo run lint",
-        "test": "turbo run test"
-    },
+        "format": "prettier --write \"**/*.{ts,tsx,md}\""
+      },
+
+    
     "devDependencies": {
         "@vitejs/plugin-react": "^4.3.4",
         "turbo": "^1.10.0",
