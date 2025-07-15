@@ -4,17 +4,39 @@
   publish = "packages/student-portal/dist"
 
 [build.environment]
+  # Node version
+  NODE_VERSION = "20.0.0"
   # Skip TypeScript type checking
   SKIP_PREFLIGHT_CHECK = "true"
   TSC_COMPILE_ON_ERROR = "true"
   NODE_ENV = "production"
+  # Ensure Vite uses the correct config
+  VITE_APP_ENV = "production"
 
+# Redirect all requests to index.html for client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
+# Cache control headers for static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 [[headers]]
   for = "/*"
-    [headers.values]
+  [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+
+# For single page apps. We want all 404s to be handled by the SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  conditions = {Language = ["en"], Role = ["anonymous", "authenticated"]}
