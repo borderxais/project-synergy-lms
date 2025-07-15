@@ -1,12 +1,13 @@
 [build]
   base = "/"
-  command = "cd packages/student-portal && npm run build-netlify"
+  command = "cd packages/student-portal && npm install && npm run build-netlify"
   publish = "packages/student-portal/dist"
 
 [build.environment]
   # Skip TypeScript type checking
   SKIP_PREFLIGHT_CHECK = "true"
   TSC_COMPILE_ON_ERROR = "true"
+  NODE_ENV = "production"
 
 [[redirects]]
   from = "/*"

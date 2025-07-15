@@ -11,6 +11,7 @@
     "scripts": {
         "dev": "turbo run dev",
         "build": "turbo run build",
+        "build:student-portal": "cd packages/student-portal && npm install && npm run build-netlify",
         "lint": "turbo run lint",
         "test": "turbo run test"
     },
