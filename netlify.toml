@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  command = "npm install && cd packages/student-portal && npm run build-netlify"
+  command = "npm run build:student-portal"
   publish = "packages/student-portal/dist"
 
 [build.environment]
