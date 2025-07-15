@@ -2,11 +2,12 @@
     "name": "@privschool-lms/student-portal",
     "version": "0.1.0",
     "private": true,
+    "type": "module",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
     },
     "dependencies": {
         "@auth0/auth0-react": "^2.2.4",
@@ -14,6 +15,7 @@
         "@privschool-lms/common": "*",
         "@tanstack/react-query": "^5.24.1",
         "@types/react-select": "^5.0.0",
+        "@vitejs/plugin-react": "^4.3.4",
         "axios": "^1.6.7",
         "date-fns": "^3.3.1",
         "firebase": "^10.14.1",
@@ -29,13 +31,19 @@
         "zustand": "^5.0.3"
     },
     "devDependencies": {
-        "@types/react": "^18.3.5",
-        "@types/react-dom": "^18.3.0",
-        "@vitejs/plugin-react": "^4.2.1",
-        "autoprefixer": "^10.4.18",
-        "eslint": "^9.9.1",
+        "@types/node": "^20.11.19",
+        "@types/react": "^18.2.56",
+        "@types/react-dom": "^18.2.19",
+        "@typescript-eslint/eslint-plugin": "^7.0.1",
+        "@typescript-eslint/parser": "^7.0.1",
+        "@vitejs/plugin-react-swc": "^3.5.0",
+        "autoprefixer": "^10.4.16",
+        "eslint": "^8.56.0",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "eslint-plugin-react-refresh": "^0.4.5",
         "postcss": "^8.4.35",
         "tailwindcss": "^3.4.1",
-        "typescript": "^5.5.3"
+        "typescript": "^5.3.3",
+        "vite-tsconfig-paths": "^4.3.2"
     }
 }
