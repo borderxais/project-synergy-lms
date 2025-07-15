@@ -1,17 +1,29 @@
 [build]
-  base = "/"
   command = "npm run build:student-portal"
   publish = "packages/student-portal/dist"
+  functions = "netlify/functions"
 
 [build.environment]
-  # Node version
   NODE_VERSION = "20.0.0"
-  # Skip TypeScript type checking
+  NPM_FLAGS = "--prefix=packages/student-portal"
+  NPM_UPDATE = "true"
+  
+  # Build environment
+  NODE_ENV = "production"
+  CI = "false"
+  
+  # Vite specific
+  VITE_APP_ENV = "production"
+  VITE_BASE = "/"
+  
+  # Skip type checking for faster builds
   SKIP_PREFLIGHT_CHECK = "true"
   TSC_COMPILE_ON_ERROR = "true"
-  NODE_ENV = "production"
-  # Ensure Vite uses the correct config
-  VITE_APP_ENV = "production"
+
+[dev]
+  framework = "vite"
+  target = "packages/student-portal"
+  port = 5173
 
 # Redirect all requests to index.html for client-side routing
 [[redirects]]
@@ -25,6 +37,7 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Security headers for all other files
 [[headers]]
   for = "/*"
   [headers.values]
@@ -32,11 +45,3 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
-
-# For single page apps. We want all 404s to be handled by the SPA
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
-  conditions = {Language = ["en"], Role = ["anonymous", "authenticated"]}

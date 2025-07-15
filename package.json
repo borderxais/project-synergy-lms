@@ -11,7 +11,7 @@
     "scripts": {
         "dev": "turbo run dev",
         "build": "turbo run build",
-        "build:student-portal": "cd packages/student-portal && npm install && npm install vite@5.1.4 && npm run build",
+        "build:student-portal": "cd packages/student-portal && npm install --production=false && npm run build",
         "lint": "turbo run lint",
         "test": "turbo run test"
     },
@@ -22,5 +22,6 @@
     },
     "dependencies": {
         "react-router-dom": "^7.5.0"
-    }
+    },
+    "packageManager": "npm@10.0.0"
 }
