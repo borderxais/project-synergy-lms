@@ -5,8 +5,11 @@
 
 [build.environment]
   NODE_VERSION = "20.0.0"
-  NPM_FLAGS = "--prefix=packages/student-portal"
+  NPM_FLAGS = "--workspaces"
   NPM_UPDATE = "true"
+  NODE_ENV = "production"
+  VITE_APP_ENV = "production"
+  VITE_BASE = "/"
   
   # Build environment
   NODE_ENV = "production"
