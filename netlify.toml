@@ -1,5 +1,5 @@
 [build]
-  command = "build.command = "npm install && npm run build:student-portal""
+  command = "npm install && npm run build:student-portal"
   publish = "packages/student-portal/dist"
   functions = "netlify/functions"
 
