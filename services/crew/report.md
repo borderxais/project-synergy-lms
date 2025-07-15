@@ -1,42 +1,42 @@
 [
   {
-    "College_Name": "Harvard University",
-    "Reason": "Harvard has a renowned debate team and offers various leadership programs. Its strong Economics department will provide a solid foundation for a career in finance."
-  },
-  {
-    "College_Name": "University of Pennsylvania",
-    "Reason": "Penn's Wharton School is a leader in finance education, and the university's emphasis on interdisciplinary studies aligns perfectly with interests in economics and leadership."
-  },
-  {
-    "College_Name": "Georgetown University",
-    "Reason": "Georgetown’s School of Foreign Service and its strong programs in public policy and economics make it ideal for students interested in debate and leadership, particularly in a global context."
-  },
-  {
-    "College_Name": "New York University",
-    "Reason": "NYU's Stern School of Business offers top-tier finance programs, and its urban environment provides numerous opportunities for public speaking and extracurricular leadership."
-  },
-  {
-    "College_Name": "American University",
-    "Reason": "American offers excellent programs in international relations and economics, alongside a very active student government and debate club that fosters leadership skills."
+    "College_Name": "Massachusetts Institute of Technology",
+    "Reason": "MIT is renowned for its cutting-edge research and innovation in STEM fields. The university offers specialized programs in Data Science and Computer Science, making it a perfect fit for students with a strong interest in technology and quantitative methodologies."
   },
   {
     "College_Name": "Stanford University",
-    "Reason": "Stanford blends a rigorous economics curriculum with a strong emphasis on leadership development, providing a collaborative environment that encourages public speaking and debate."
+    "Reason": "Stanford's proximity to Silicon Valley provides unparalleled opportunities for internships and networking in the technology sector. The university has a prestigious Computer Science program that emphasizes interdisciplinary studies, aligning well with interests in data-driven solutions."
   },
   {
-    "College_Name": "Columbia University",
-    "Reason": "Columbia’s Core Curriculum fosters strong analytical skills, essential for debate and economics, and its location in NYC allows for abundant opportunities in leadership and finance."
+    "College_Name": "California Institute of Technology",
+    "Reason": "Caltech is an elite institution particularly strong in engineering and the sciences, fostering a close-knit academic environment. The focus on research and small class sizes will allow students to engage directly with faculty, crucial for those pursuing advanced studies in STEM."
   },
   {
-    "College_Name": "Duke University",
-    "Reason": "Duke's programs in Public Policy and its well-rounded approach to economics and leadership development make it an excellent fit for your goals."
+    "College_Name": "Carnegie Mellon University",
+    "Reason": "Carnegie Mellon is globally recognized for its Computer Science and Artificial Intelligence programs. It offers a strong emphasis on interdisciplinary collaboration, which is essential for students interested in fields like Data Science."
   },
   {
-    "College_Name": "University of California, Berkeley",
-    "Reason": "UC Berkeley has a prestigious Economics department and offers a variety of clubs and organizations focused on debate and leadership, critical for your interests."
+    "College_Name": "Georgia Institute of Technology",
+    "Reason": "Georgia Tech combines rigorous academic programs with extensive co-op and internship opportunities in Atlanta's vibrant tech scene. The College of Computing is particularly noted for its innovative curriculum in Computer Science and Data Science."
   },
   {
-    "College_Name": "Boston University",
-    "Reason": "BU offers a vibrant environment for debate through its well-regarded programs in communication as well as strong finance and economics courses, making it ideal for your ambitions."
+    "College_Name": "University of California-Berkeley",
+    "Reason": "UC Berkeley has a highly regarded Computer Science program with opportunities for research in data analysis and machine learning. The university's diverse student body and strong tech entrepreneurship culture make it appealing for STEM-focused students."
+  },
+  {
+    "College_Name": "University of Illinois-Urbana-Champaign",
+    "Reason": "UIUC has a strong reputation for its engineering and computer science programs, known for their excellence in research and innovation in data science, making it a competitive option for students looking to make an impact in STEM."
+  },
+  {
+    "College_Name": "University of Michigan-Ann Arbor",
+    "Reason": "The University of Michigan offers a robust Computer Science curriculum and is well-placed in the tech job market. Its emphasis on collaborative projects and research experience aligns perfectly with student goals in STEM."
+  },
+  {
+    "College_Name": "University of Washington",
+    "Reason": "Ranked among the top for Computer Science programs, UW has a strong focus on innovation and research in fields such as data science and artificial intelligence. Its location in Seattle offers students vast opportunities in the tech industry."
+  },
+  {
+    "College_Name": "Northeastern University",
+    "Reason": "Northeastern's experiential learning model, particularly its co-op program, enables students to gain practical experience in tech and STEM fields while studying, making it an ideal choice for students focused on careers in Data Science."
   }
 ]
