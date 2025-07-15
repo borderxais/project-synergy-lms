@@ -1,10 +1,10 @@
 [build]
-  command = "cd packages/student-portal && npm install && npm run build"
+  command = "cd packages/student-portal && npm install autoprefixer --save-dev && npm install && npm run build"
   publish = "packages/student-portal/dist"
   functions = "netlify/functions"
 
 [build.environment]
-  NODE_VERSION = "20.0.0"
+  NODE_VERSION = "20.9.0"
   NPM_FLAGS = "--workspaces"
   NPM_UPDATE = "true"
   NODE_ENV = "production"
