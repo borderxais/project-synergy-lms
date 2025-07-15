@@ -14,6 +14,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  css: {
+    // Disable PostCSS processing to avoid dependency issues
+    postcss: false
+  },
   // Skip TypeScript type checking to avoid errors from common package
   optimizeDeps: {
     esbuildOptions: {
@@ -25,8 +29,16 @@ export default defineConfig({
     typescript: {
       transpileOnly: true,
     },
-    // Ensure CSS processing works without postcss-import
+    // Ensure CSS processing works properly
     cssCodeSplit: true,
     cssMinify: true,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
+          return;
+        }
+        warn(warning);
+      },
+    },
   },
 });
