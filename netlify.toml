@@ -1,5 +1,5 @@
 [build]
-  command = "cd packages/student-portal && npm install --legacy-peer-deps && npm run build"
+  command = "cd packages/student-portal && npm install --no-workspaces --legacy-peer-deps && npm run build"
   publish = "packages/student-portal/dist"
   functions = "netlify/functions"
 
