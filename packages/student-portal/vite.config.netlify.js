@@ -15,13 +15,8 @@ export default defineConfig({
     },
   },
   css: {
-    // Enable PostCSS processing but with inline minimal config
-    postcss: {
-      plugins: [
-        require('tailwindcss'),
-        require('autoprefixer')
-      ]
-    }
+    // Disable PostCSS processing in Vite to avoid dynamic require issues
+    postcss: false
   },
   // Skip TypeScript type checking to avoid errors from common package
   optimizeDeps: {
