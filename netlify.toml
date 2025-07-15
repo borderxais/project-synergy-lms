@@ -1,0 +1,19 @@
+[build]
+  base = "/"
+  command = "cd packages/student-portal && npm run build-netlify"
+  publish = "packages/student-portal/dist"
+
+[build.environment]
+  # Skip TypeScript type checking
+  SKIP_PREFLIGHT_CHECK = "true"
+  TSC_COMPILE_ON_ERROR = "true"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
