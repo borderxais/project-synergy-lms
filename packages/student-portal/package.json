@@ -28,6 +28,7 @@
         "react-router-dom": "^6.22.3",
         "react-select": "^5.10.1",
         "vite": "^5.1.4",
+        "vite-tsconfig-paths": "^4.2.1",
         "zod": "^3.22.4",
         "zustand": "^5.0.3"
     },
@@ -47,11 +48,6 @@
         "postcss-nested": "^6.2.0",
         "postcss-preset-env": "^9.6.0",
         "tailwindcss": "^3.4.17",
-        "typescript": "^5.3.3",
-        "vite-tsconfig-paths": "^4.3.2"
-    },
-    "engines": {
-        "node": ">=18.18.0 <21.0.0",
-        "npm": ">=8.0.0"
+        "typescript": "^5.3.3"
     }
 }
