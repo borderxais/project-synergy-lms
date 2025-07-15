@@ -12,14 +12,7 @@
   VITE_BASE = "/"
   
   # Build environment
-  NODE_ENV = "production"
   CI = "false"
-  
-  # Vite specific
-  VITE_APP_ENV = "production"
-  VITE_BASE = "/"
-  
-  # Skip type checking for faster builds
   SKIP_PREFLIGHT_CHECK = "true"
   TSC_COMPILE_ON_ERROR = "true"
 
@@ -33,18 +26,3 @@
   from = "/*"
   to = "/index.html"
   status = 200
-
-# Cache control headers for static assets
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Security headers for all other files
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
