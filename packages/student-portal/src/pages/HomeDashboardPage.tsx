@@ -20,11 +20,12 @@ const HomeDashboardPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedScheduleItem, setSelectedScheduleItem] = useState<ScheduleItem | null>(null);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [customTypeColors, setCustomTypeColors] = useState<Record<string, string | null>>({});
 
   // Mock data for the schedule - this would come from the backend in a real implementation
   const [schedule, setSchedule] = useState<ScheduleItem[]>([
-    { day: 'Monday', time: '8:00', subject: 'English', type: 'education' },
-    { day: 'Monday', time: '9:00', subject: 'Math', type: 'education' },
+    { day: 'Monday', time: '8:00', subject: 'English', type: 'english' },
+    { day: 'Monday', time: '9:00', subject: 'Math', type: 'math' },
     { 
       day: 'Monday', 
       time: '10:00-12:00', 
@@ -49,25 +50,25 @@ const HomeDashboardPage: React.FC = () => {
     { day: 'Monday', time: '14:00-15:00', subject: 'College Course', type: 'college' },
     { day: 'Monday', time: '15:00-16:00', subject: 'Practice', type: 'fencing' },
 
-    { day: 'Tuesday', time: '8:00', subject: 'Social Science', type: 'education' },
-    { day: 'Tuesday', time: '9:00', subject: 'World Language', type: 'education' },
+    { day: 'Tuesday', time: '8:00', subject: 'History', type: 'history' },
+    { day: 'Tuesday', time: '9:00', subject: 'World Language', type: 'language' },
     { day: 'Tuesday', time: '10:00-11:00', subject: 'College Course', type: 'college' },
     { day: 'Tuesday', time: '11:00-12:00', subject: 'Homeroom', type: 'recess' },
-    { day: 'Tuesday', time: '13:00-14:00', subject: 'Science', type: 'education' },
+    { day: 'Tuesday', time: '13:00-14:00', subject: 'Science', type: 'science' },
     { day: 'Tuesday', time: '14:00-16:00', subject: 'Strength and Conditioning', type: 'fencing' },
     { day: 'Tuesday', time: '16:00-17:00', subject: 'Volunteer', type: 'club' },
 
     { day: 'Wednesday', time: '8:00-9:00', subject: 'Homeroom', type: 'recess' },
     { day: 'Wednesday', time: '9:00-11:00', subject: 'Group Classes', type: 'fencing' },
-    { day: 'Wednesday', time: '11:00-12:00', subject: 'English', type: 'education' },
+    { day: 'Wednesday', time: '11:00-12:00', subject: 'English', type: 'english' },
     { day: 'Wednesday', time: '12:00-13:00', subject: 'Lunch', type: 'recess' },
-    { day: 'Wednesday', time: '13:00-14:00', subject: 'Math', type: 'education' },
+    { day: 'Wednesday', time: '13:00-14:00', subject: 'Math', type: 'math' },
     { day: 'Wednesday', time: '14:00-16:00', subject: 'Strength and Conditioning', type: 'fencing' },
 
-    { day: 'Thursday', time: '8:00', subject: 'Social Science', type: 'education' },
-    { day: 'Thursday', time: '9:00', subject: 'World Language', type: 'education' },
+    { day: 'Thursday', time: '8:00', subject: 'History', type: 'history' },
+    { day: 'Thursday', time: '9:00', subject: 'World Language', type: 'language' },
     { day: 'Thursday', time: '10:00-11:00', subject: 'College Course', type: 'college' },
-    { day: 'Thursday', time: '11:00-12:00', subject: 'Science', type: 'education' },
+    { day: 'Thursday', time: '11:00-12:00', subject: 'Science', type: 'science' },
     { day: 'Thursday', time: '13:00-14:00', subject: 'Homeroom', type: 'recess' },
     { day: 'Thursday', time: '14:00-15:00', subject: 'Specialized training', type: 'fencing' },
     { day: 'Thursday', time: '15:00-16:00', subject: 'Volunteer', type: 'club' },
@@ -75,7 +76,7 @@ const HomeDashboardPage: React.FC = () => {
 
     { day: 'Friday', time: '8:00-10:00', subject: 'Private Lessons', type: 'fencing' },
     { day: 'Friday', time: '10:00-11:00', subject: 'Club', type: 'club' },
-    { day: 'Friday', time: '11:00-12:00', subject: 'World Language', type: 'education' },
+    { day: 'Friday', time: '11:00-12:00', subject: 'World Language', type: 'language' },
     { day: 'Friday', time: '13:00-14:00', subject: 'Homeroom', type: 'recess' },
     { day: 'Friday', time: '14:00-16:00', subject: 'Strength and Conditioning', type: 'fencing' },
   ]);
@@ -188,6 +189,7 @@ const HomeDashboardPage: React.FC = () => {
       name: 'Advanced Fencing Techniques',
       instructor: 'Coach Smith',
       progress: 65,
+      type: 'fencing',
       nextAssignment: {
         title: 'Footwork Analysis Video',
         dueDate: '2025-04-10',
@@ -198,6 +200,7 @@ const HomeDashboardPage: React.FC = () => {
       name: 'College English 101',
       instructor: 'Prof. Johnson',
       progress: 42,
+      type: 'english',
       nextAssignment: {
         title: 'Essay: Modern Literature',
         dueDate: '2025-04-08',
@@ -208,6 +211,7 @@ const HomeDashboardPage: React.FC = () => {
       name: 'AP Calculus',
       instructor: 'Ms. Garcia',
       progress: 78,
+      type: 'math',
       nextAssignment: {
         title: 'Problem Set 7',
         dueDate: '2025-04-07',
@@ -218,6 +222,7 @@ const HomeDashboardPage: React.FC = () => {
       name: 'World History',
       instructor: 'Dr. Lee',
       progress: 91,
+      type: 'history',
       nextAssignment: {
         title: 'Research Project',
         dueDate: '2025-04-15',
@@ -238,6 +243,34 @@ const HomeDashboardPage: React.FC = () => {
   const closeNotesModal = () => {
     setIsNotesModalOpen(false);
     setSelectedScheduleItem(null);
+  };
+
+  // Helper function to update schedule item color
+  const handleUpdateScheduleColor = (color: string) => {
+    if (!selectedScheduleItem) return;
+
+    // Update the custom color for all items of this type
+    setCustomTypeColors(prev => ({
+      ...prev,
+      [selectedScheduleItem.type]: color || null
+    }));
+
+    // Update all schedule items of the same type
+    setSchedule(prev => prev.map(item => {
+      if (item.type === selectedScheduleItem.type) {
+        return {
+          ...item,
+          customColor: color || undefined
+        };
+      }
+      return item;
+    }));
+
+    // Update the selected item to reflect the change
+    setSelectedScheduleItem(prev => prev ? {
+      ...prev,
+      customColor: color || undefined
+    } : null);
   };
 
   // Toggle todo item completion
@@ -350,43 +383,79 @@ const HomeDashboardPage: React.FC = () => {
     );
   }
 
+  // Mock student data
+  const mockStudentData: Student = {
+    firstName: user?.firstName,
+    lastName: user?.lastName,
+    grade: user?.grade,
+    currentSchool: user?.currentSchool,
+    gender: user?.gender,
+    schoolType: user?.schoolType,
+    stats: {
+      gpa: user?.gpa,
+      weightedGpa: user?.weightedGpa,
+      psat: user?.psat,
+    },
+    currentCourses: user?.currentCourses,
+    interests: user?.interests,
+    extracurriculars: user?.extracurriculars,
+    achievements: user?.achievements,
+    goals: user?.goals,
+    strengths: user?.strengths,
+    weaknesses: user?.weaknesses,
+    schedule: user?.schedule,
+    notes: user?.notes,
+    academicInterests: user?.academicInterests || [], // Add missing field
+    roadmap: {
+      shortTerm: user?.roadmap?.shortTerm,
+      longTerm: user?.roadmap?.longTerm,
+    },
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <DashboardHeader studentData={studentData} userEmail={user?.email} />
-      
+
       {/* Main content */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ maxWidth: "90%" }}>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Current Courses Section */}
           <div className="lg:col-span-1">
-            <CurrentCourses courses={courses} />
+            <CurrentCourses 
+              courses={courses}
+              onCoursesUpdate={setCourses}
+              customTypeColors={customTypeColors}
+            />
           </div>
           
           {/* Weekly Schedule Section */}
           <div className="lg:col-span-3">
             <WeeklySchedule 
               schedule={schedule} 
-              onScheduleItemClick={handleScheduleItemClick} 
+              onScheduleItemClick={handleScheduleItemClick}
+              onScheduleUpdate={setSchedule}
+              customTypeColors={customTypeColors}
             />
           </div>
         </div>
         
         {/* Weekly To-Do List Section */}
         <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Weekly To-Do List</h2>
           <WeeklyTodoList 
             todoItems={todoItems} 
-            onToggleComplete={toggleTodoComplete} 
+            onToggleComplete={toggleTodoComplete}
+            onTodoUpdate={setTodoItems}
           />
         </div>
       </div>
-      
-      {/* Notes Modal */}
+
+      {/* Schedule Notes Modal */}
       <ScheduleNotesModal 
         scheduleItem={selectedScheduleItem} 
         isOpen={isNotesModalOpen} 
-        onClose={closeNotesModal} 
+        onClose={closeNotesModal}
+        onUpdateColor={handleUpdateScheduleColor}
       />
     </div>
   );

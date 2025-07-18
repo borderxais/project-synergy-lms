@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TodoItem } from '../../../types/dashboard';
+import Modal from '../../common/Modal';
 
 interface CompletionTime {
   id: string;
@@ -9,9 +10,10 @@ interface CompletionTime {
 interface WeeklyTodoListProps {
   todoItems: TodoItem[];
   onToggleComplete: (id: string) => void;
+  onTodoUpdate: (todos: TodoItem[]) => void;
 }
 
-const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComplete }) => {
+const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComplete, onTodoUpdate }) => {
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({
     Monday: true,
     Tuesday: true,
@@ -20,6 +22,8 @@ const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComp
     Friday: true,
     'Any Day': true
   });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Track completion timestamps
   const [completionTimes, setCompletionTimes] = useState<CompletionTime[]>([]);
@@ -92,6 +96,30 @@ const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComp
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Weekly To-Do List</h2>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            title="Add Todo Item"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+          </button>
+        </div>
+
         {days.map((day) => {
           const dayTodos = todoItems.filter((item) => item.day === day);
           const sortedDayTodos = sortTodos(dayTodos);
@@ -193,6 +221,17 @@ const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComp
             )}
           </div>
         )}
+
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Add Todo Item"
+        >
+          <div className="space-y-4">
+            {/* Content will be added based on your requirements */}
+            <p className="text-gray-500 italic">Modal content will be implemented as specified.</p>
+          </div>
+        </Modal>
       </div>
     </div>
   );

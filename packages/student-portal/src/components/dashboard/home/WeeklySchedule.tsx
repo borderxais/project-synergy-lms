@@ -1,17 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScheduleItem } from '../../../types/dashboard';
+import Modal from '../../common/Modal';
 
 interface WeeklyScheduleProps {
   schedule: ScheduleItem[];
   onScheduleItemClick: (item: ScheduleItem) => void;
+  onScheduleUpdate: (schedule: ScheduleItem[]) => void;
+  customTypeColors?: Record<string, string | null>;
 }
 
-const getColorClass = (type: string) => {
+const getColorClass = (type: string, customColor?: string) => {
+  if (customColor) {
+    return customColor;
+  }
+
   switch (type) {
     case 'fencing':
       return 'bg-red-300 text-red-800';
-    case 'education':
+    case 'math':
       return 'bg-purple-300 text-purple-800';
+    case 'english':
+      return 'bg-pink-300 text-pink-800';
+    case 'science':
+      return 'bg-green-300 text-green-800';
+    case 'history':
+      return 'bg-gray-300 text-gray-800';
+    case 'language':
+      return 'bg-amber-300 text-amber-800';
     case 'recess':
       return 'bg-yellow-200 text-yellow-800';
     case 'college':
@@ -23,11 +38,50 @@ const getColorClass = (type: string) => {
   }
 };
 
-export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({ schedule, onScheduleItemClick }) => {
+const scheduleKeyItems = [
+  { type: 'fencing', label: 'Fencing Practice' },
+  { type: 'math', label: 'Mathematics' },
+  { type: 'english', label: 'English' },
+  { type: 'science', label: 'Science' },
+  { type: 'history', label: 'History' },
+  { type: 'language', label: 'Language' },
+  { type: 'recess', label: 'Recess' },
+  { type: 'college', label: 'College Course' },
+  { type: 'club', label: 'Club & Volunteer' },
+];
+
+export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({ 
+  schedule, 
+  onScheduleItemClick,
+  onScheduleUpdate,
+  customTypeColors = {}
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="bg-white rounded-lg shadow h-full flex flex-col">
-      <div className="p-5 border-b">
+      <div className="p-5 border-b flex justify-between items-center">
         <h2 className="text-xl font-semibold text-gray-900">Weekly Schedule</h2>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+          title="Add Schedule Item"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4.5v15m7.5-7.5h-15"
+            />
+          </svg>
+        </button>
       </div>
 
       <div className="w-full flex-grow">
@@ -59,7 +113,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({ schedule, onSche
                     <td key={`${day}-${time}`} className="px-2 h-16 text-sm text-gray-500">
                       {item && (
                         <div 
-                          className={`${getColorClass(item.type)} px-2 h-full flex items-center justify-center rounded-md cursor-pointer hover:opacity-80 transition-opacity text-center`}
+                          className={`${getColorClass(item.type, customTypeColors[item.type] || undefined)} px-2 h-full w-[150px] mx-auto flex items-center justify-center rounded-md cursor-pointer hover:opacity-80 transition-opacity text-center`}
                           onClick={() => onScheduleItemClick(item)}
                         >
                           {item.subject}
@@ -78,13 +132,27 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({ schedule, onSche
       <div className="p-4 border-t">
         <h3 className="text-sm font-medium text-gray-700 mb-2">Schedule Key:</h3>
         <div className="flex flex-wrap gap-2">
-          <div className="bg-red-300 text-red-800 px-2 py-1 rounded-md text-sm">Fencing Practice</div>
-          <div className="bg-purple-300 text-purple-800 px-2 py-1 rounded-md text-sm">General Education</div>
-          <div className="bg-yellow-200 text-yellow-800 px-2 py-1 rounded-md text-sm">Recess</div>
-          <div className="bg-orange-200 text-orange-800 px-2 py-1 rounded-md text-sm">College Course</div>
-          <div className="bg-blue-300 text-blue-800 px-2 py-1 rounded-md text-sm">Club & Volunteer</div>
+          {scheduleKeyItems.map(item => (
+            <div 
+              key={item.type}
+              className={`${getColorClass(item.type, customTypeColors[item.type] || undefined)} px-2 py-1 rounded-md text-sm`}
+            >
+              {item.label}
+            </div>
+          ))}
         </div>
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Add Schedule Item"
+      >
+        <div className="space-y-4">
+          {/* Content will be added based on your requirements */}
+          <p className="text-gray-500 italic">Modal content will be implemented as specified.</p>
+        </div>
+      </Modal>
     </div>
   );
 };
