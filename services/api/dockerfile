@@ -15,8 +15,8 @@ COPY services/api/ .
 # Environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Expose port
-EXPOSE 8001
+# Expose port - App Engine will use the PORT env variable
+EXPOSE 8080
 
-# Command to run the service
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+# Command to run the service - use PORT env variable
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8001}"]

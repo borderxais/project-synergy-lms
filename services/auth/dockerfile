@@ -17,8 +17,8 @@ RUN mkdir -p ./config
 # Environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Expose port
-EXPOSE 8000
+# Expose port - App Engine will use the PORT env variable
+EXPOSE 8080
 
-# Command to run the service
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run the service - use PORT env variable
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]

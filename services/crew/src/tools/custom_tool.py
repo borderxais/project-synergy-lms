@@ -4,6 +4,15 @@ from typing import Type, Optional
 import firebase_admin
 from firebase_admin import credentials, firestore
 import re
+import os
+import json
+import base64
+import logging
+import binascii
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class StudentProfileInput(BaseModel):
     gpa: float = Field(..., description="Student's GPA")
@@ -13,11 +22,32 @@ class StudentProfileInput(BaseModel):
 
 # Initialize Firebase once at module level
 try:
-    cred = credentials.Certificate("/app/db/serviceAccountKey.json")
+    # First try to get service account from environment variable
+    service_account_base64 = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON')
+    if service_account_base64 and len(service_account_base64) > 100:
+        try:
+            logger.info("Attempting to use Firebase service account from environment variable")
+            # Decode base64 string to JSON string
+            service_account_json = base64.b64decode(service_account_base64).decode('utf-8')
+            service_account = json.loads(service_account_json)
+            cred = credentials.Certificate(service_account)
+            logger.info("Successfully loaded Firebase credentials from environment variable")
+        except (binascii.Error, json.JSONDecodeError, ValueError) as e:
+            logger.error(f"Failed to decode Firebase service account from environment: {e}")
+            logger.info("Falling back to service account file")
+            # Fall back to file
+            cred = credentials.Certificate("/app/db/serviceAccountKey.json")
+    else:
+        # Fall back to file
+        logger.info("Using Firebase service account from file")
+        cred = credentials.Certificate("/app/db/serviceAccountKey.json")
+    
     firebase_admin.initialize_app(cred)
+    logger.info("Firebase Admin SDK initialized successfully")
     db = firestore.client()
 except Exception as e:
-    print(f"Failed to initialize Firebase: {e}")
+    logger.error(f"Error initializing Firebase: {e}")
+    raise
 
 # Dynamic margins based on selectivity
 MARGINS = {

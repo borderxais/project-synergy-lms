@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 from pathlib import Path
@@ -26,9 +27,11 @@ class FirebaseConfig:
             
             # Check if path exists
             if not Path(service_account_path).exists():
-                # Try to load from environment variable as JSON string
-                service_account_json = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON')
-                if service_account_json:
+                # Try to load from environment variable as base64-encoded JSON string
+                service_account_base64 = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON')
+                if service_account_base64:
+                    # Decode base64 string to JSON string
+                    service_account_json = base64.b64decode(service_account_base64).decode('utf-8')
                     service_account = json.loads(service_account_json)
                     cred = credentials.Certificate(service_account)
                 else:

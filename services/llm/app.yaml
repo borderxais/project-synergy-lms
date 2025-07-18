@@ -1,0 +1,18 @@
+runtime: custom
+env: flex
+service: llm
+
+# Specify the Dockerfile to use
+manual_scaling:
+  instances: 1
+
+resources:
+  cpu: 2
+  memory_gb: 4
+  disk_size_gb: 10
+
+env_variables:
+  PYTHONUNBUFFERED: "1"
+  # These will be set in the deployment environment
+  OPENAI_API_KEY: ${OPENAI_API_KEY}
+  FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON}

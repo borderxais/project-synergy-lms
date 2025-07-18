@@ -9,6 +9,8 @@ from pathlib import Path
 import traceback
 from google.cloud.firestore_v1.transforms import Sentinel
 from google.cloud.firestore_v1.field_path import FieldPath
+import os
+import base64
 
 
 def replace_sentinel_strings(obj):
@@ -40,14 +42,26 @@ class FirestoreClient:
             return
             
         try:
-            # Get the directory where this file is located
-            current_dir = Path(__file__).parent
-            cred_path = current_dir / "serviceAccountKey.json"
-            
             # Initialize Firebase Admin only if not already initialized
             if not firebase_admin._apps:
                 logger.info("Initializing Firebase Admin SDK for Python server...")
-                cred = credentials.Certificate(str(cred_path))
+                
+                # First try to get service account from environment variable
+                service_account_base64 = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON')
+                if service_account_base64:
+                    # Decode base64 string to JSON string
+                    logger.info("Using Firebase service account from environment variable")
+                    service_account_json = base64.b64decode(service_account_base64).decode('utf-8')
+                    service_account = json.loads(service_account_json)
+                    cred = credentials.Certificate(service_account)
+                else:
+                    # Fall back to file
+                    logger.info("Using Firebase service account from file")
+                    # Get the directory where this file is located
+                    current_dir = Path(__file__).parent
+                    cred_path = current_dir / "serviceAccountKey.json"
+                    cred = credentials.Certificate(str(cred_path))
+                
                 firebase_admin.initialize_app(cred)
                 logger.info("Firebase Admin SDK initialized successfully for Python server")
             else:
@@ -58,7 +72,7 @@ class FirestoreClient:
             self._initialized = True
         except Exception as e:
             logger.error(f"Failed to initialize Firestore client: {e}")
-            raise
+            logger.error(traceback.format_exc())
 
     async def create_user(self, user_data: Dict[str, Any]) -> str:
         """Create a new user in the users collection."""

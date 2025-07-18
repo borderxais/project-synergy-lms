@@ -12,5 +12,8 @@ COPY src/ ./src/
 # Set Python path to include src directory
 ENV PYTHONPATH=/app
 
-# Run the application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8003", "--reload"]
+# Expose port - App Engine will use the PORT env variable
+EXPOSE 8080
+
+# Run the application using the PORT environment variable
+CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8003} --reload"]
