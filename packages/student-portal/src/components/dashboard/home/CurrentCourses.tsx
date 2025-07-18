@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Course } from '../../../types/dashboard';
 import Modal from '../../common/Modal';
+import EditCoursesModal from './EditCoursesModal';
 
 interface CurrentCoursesProps {
   courses: Course[];
@@ -142,17 +143,12 @@ const CurrentCourses: React.FC<CurrentCoursesProps> = ({ courses, onCoursesUpdat
           </div>
         ))}
       </div>
-
-      <Modal
+      <EditCoursesModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Edit Courses"
-      >
-        <div className="space-y-4">
-          {/* Content will be added based on your requirements */}
-          <p className="text-gray-500 italic">Modal content will be implemented as specified.</p>
-        </div>
-      </Modal>
+        courses={courses}
+        onCoursesUpdate={onCoursesUpdate}
+      />
     </div>
   );
 };
