@@ -42,8 +42,8 @@ const AddScheduleItemForm: React.FC<AddScheduleItemFormProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     day: DAYS[0],
-    startTime: TIME_SLOTS[0],
-    endTime: '',
+    startTime: '8:00',
+    endTime: '9:00',
     subject: '',
     type: SUBJECT_TYPES[0].value as ScheduleItem['type'],
     notes: [''],
@@ -61,6 +61,9 @@ const AddScheduleItemForm: React.FC<AddScheduleItemFormProps> = ({
       newErrors.subject = 'Subject is required';
     }
 
+    if (!formData.endTime) {
+      newErrors.endTime = 'End time is required';
+    }
     if (formData.endTime && formData.endTime <= formData.startTime) {
       newErrors.endTime = 'End time must be after start time';
     }
@@ -161,14 +164,15 @@ const AddScheduleItemForm: React.FC<AddScheduleItemFormProps> = ({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            End Time (Optional)
+            End Time
           </label>
           <select
             value={formData.endTime}
             onChange={e => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-            className="w-full rounded-md border border-gray-300 px-3 py-2"
+            className={`w-full rounded-md border px-3 py-2 ${errors.endTime ? 'border-red-500' : 'border-gray-300'}`}
+            required
           >
-            <option value="">Same as start</option>
+            <option value="">Select end time</option>
             {TIME_SLOTS.filter(time => {
               // Convert times to minutes for comparison
               const startMinutes = formData.startTime.split(':').reduce((acc, val, i) => acc + (i === 0 ? parseInt(val) * 60 : parseInt(val)), 0);
