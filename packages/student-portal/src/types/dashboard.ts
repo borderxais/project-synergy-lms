@@ -4,9 +4,12 @@ export interface ScheduleItem {
   day: string;
   time: string;
   subject: string;
-  type: 'fencing' | 'recess' | 'college' | 'club' | 'math' | 'english' | 'science' | 'history' | 'language';
+  type: 'athletics' | 'recess' | 'college' | 'club' | 'math' | 'english' | 'science' | 'history' | 'language';
   notes?: string[];
   customColor?: string;
+  room?: string;
+  instructor?: string;
+  isRecurring?: boolean;
 }
 
 export interface Course {
@@ -14,7 +17,12 @@ export interface Course {
   name: string;
   instructor: string;
   progress: number;
-  type: 'fencing' | 'recess' | 'college' | 'club' | 'math' | 'english' | 'science' | 'history' | 'language';
+  type: 'athletics' | 'recess' | 'college' | 'club' | 'math' | 'english' | 'science' | 'history' | 'language';
+  grade: {
+    percentage: number;
+    letter: string;
+  };
+  room?: string;
   nextAssignment?: {
     title: string;
     dueDate: string;

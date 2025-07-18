@@ -14,8 +14,8 @@ const getColorClass = (type: string, customColor?: string) => {
   }
 
   switch (type) {
-    case 'fencing':
-      return 'bg-red-300 text-red-800';
+    case 'athletics':
+      return 'bg-gray-200 text-gray-800';
     case 'math':
       return 'bg-purple-300 text-purple-800';
     case 'english':
@@ -23,7 +23,7 @@ const getColorClass = (type: string, customColor?: string) => {
     case 'science':
       return 'bg-green-300 text-green-800';
     case 'history':
-      return 'bg-gray-300 text-gray-800';
+      return 'bg-red-300 text-red-800';
     case 'language':
       return 'bg-amber-300 text-amber-800';
     case 'recess':
@@ -35,6 +35,46 @@ const getColorClass = (type: string, customColor?: string) => {
     default:
       return 'bg-gray-200 text-gray-800';
   }
+};
+
+const CircularProgress: React.FC<{ progress: number }> = ({ progress }) => {
+  const radius = 30;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative inline-flex items-center justify-center">
+        <svg className="transform -rotate-90 w-20 h-20">
+          {/* Background circle */}
+          <circle
+            className="text-gray-200"
+            strokeWidth="8"
+            stroke="currentColor"
+            fill="transparent"
+            r={radius}
+            cx="40"
+            cy="40"
+          />
+          {/* Progress circle */}
+          <circle
+            className="text-green-600"
+            strokeWidth="8"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            stroke="currentColor"
+            fill="transparent"
+            r={radius}
+            cx="40"
+            cy="40"
+          />
+        </svg>
+        <span className="absolute text-xl font-semibold">{progress}%</span>
+      </div>
+      <span className="text-xs font-normal text-gray-400 mt-1">Progress</span>
+    </div>
+  );
 };
 
 const CurrentCourses: React.FC<CurrentCoursesProps> = ({ courses, onCoursesUpdate, customTypeColors = {} }) => {
@@ -69,33 +109,35 @@ const CurrentCourses: React.FC<CurrentCoursesProps> = ({ courses, onCoursesUpdat
         {courses.map((course) => (
           <div key={course.id} className="border rounded-lg overflow-hidden">
             <div className={`${getColorClass(course.type, customTypeColors[course.type] || undefined)} p-4 rounded-t-lg`}>
-              <h3 className="font-medium text-lg">{course.name}</h3>
-              <p className="text-sm opacity-90">Instructor: {course.instructor}</p>
+              <div className="flex justify-between items-start">
+                <div className="flex-1 min-w-0 mr-3">
+                  <h3 className="font-medium text-lg line-clamp-2 inherit-text-color">{course.name}</h3>
+                  <p className="text-sm opacity-90 inherit-text-color">Instructor: {course.instructor}</p>
+                  {course.room && (
+                    <p className="text-sm opacity-90 inherit-text-color">Room: {course.room}</p>
+                  )}
+                </div>
+                <div className="bg-white bg-opacity-20 px-2.5 py-0.5 rounded-full flex-shrink-0 inherit-text-color">
+                  <span className="text-sm font-medium">{course.grade.letter}</span>
+                </div>
+              </div>
             </div>
 
             <div className="p-4 bg-white">
-              <div className="mt-2">
-                <div className="flex justify-between text-sm text-gray-600 mb-1">
-                  <span>Progress</span>
-                  <span>{course.progress}%</span>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  {course.nextAssignment && (
+                    <div>
+                      <p className="text-sm font-medium">Next Assignment:</p>
+                      <p className="text-sm">{course.nextAssignment.title}</p>
+                      <p className="text-xs text-gray-500">
+                        Due: {new Date(course.nextAssignment.dueDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div
-                    className="h-2.5 rounded-full"
-                    style={{ width: `${course.progress}%`, backgroundColor: '#6fa68a' }}
-                  />
-                </div>
+                <CircularProgress progress={course.progress} />
               </div>
-
-              {course.nextAssignment && (
-                <div className="mt-3 pt-3 border-t">
-                  <p className="text-sm font-medium">Next Assignment:</p>
-                  <p className="text-sm">{course.nextAssignment.title}</p>
-                  <p className="text-xs text-gray-500">
-                    Due: {new Date(course.nextAssignment.dueDate).toLocaleDateString()}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         ))}

@@ -24,13 +24,13 @@ const HomeDashboardPage: React.FC = () => {
 
   // Mock data for the schedule - this would come from the backend in a real implementation
   const [schedule, setSchedule] = useState<ScheduleItem[]>([
-    { day: 'Monday', time: '8:00', subject: 'English', type: 'english' },
+    { day: 'Monday', time: '8:00', subject: 'English 3', type: 'english' },
     { day: 'Monday', time: '9:00', subject: 'Math', type: 'math' },
     { 
       day: 'Monday', 
       time: '10:00-12:00', 
       subject: 'Master Class', 
-      type: 'fencing',
+      type: 'athletics',
       notes: [
         'Practice improving counterattack reaction time',
         'Reaction and neural response training'
@@ -40,7 +40,7 @@ const HomeDashboardPage: React.FC = () => {
       day: 'Monday', 
       time: '13:00-14:00', 
       subject: 'Specialized training', 
-      type: 'fencing',
+      type: 'athletics',
       notes: [
         'Focus on correct movement techniques',
         'Strength & conditioning: core muscle reinforcement',
@@ -48,37 +48,37 @@ const HomeDashboardPage: React.FC = () => {
       ]
     },
     { day: 'Monday', time: '14:00-15:00', subject: 'College Course', type: 'college' },
-    { day: 'Monday', time: '15:00-16:00', subject: 'Practice', type: 'fencing' },
+    { day: 'Monday', time: '15:00-16:00', subject: 'Practice', type: 'athletics' },
 
     { day: 'Tuesday', time: '8:00', subject: 'History', type: 'history' },
     { day: 'Tuesday', time: '9:00', subject: 'World Language', type: 'language' },
     { day: 'Tuesday', time: '10:00-11:00', subject: 'College Course', type: 'college' },
     { day: 'Tuesday', time: '11:00-12:00', subject: 'Homeroom', type: 'recess' },
     { day: 'Tuesday', time: '13:00-14:00', subject: 'Science', type: 'science' },
-    { day: 'Tuesday', time: '14:00-16:00', subject: 'Strength and Conditioning', type: 'fencing' },
+    { day: 'Tuesday', time: '14:00-16:00', subject: 'Strength and Conditioning', type: 'athletics' },
     { day: 'Tuesday', time: '16:00-17:00', subject: 'Volunteer', type: 'club' },
 
     { day: 'Wednesday', time: '8:00-9:00', subject: 'Homeroom', type: 'recess' },
-    { day: 'Wednesday', time: '9:00-11:00', subject: 'Group Classes', type: 'fencing' },
-    { day: 'Wednesday', time: '11:00-12:00', subject: 'English', type: 'english' },
+    { day: 'Wednesday', time: '9:00-11:00', subject: 'Group Classes', type: 'athletics' },
+    { day: 'Wednesday', time: '11:00-12:00', subject: 'English 3', type: 'english' },
     { day: 'Wednesday', time: '12:00-13:00', subject: 'Lunch', type: 'recess' },
     { day: 'Wednesday', time: '13:00-14:00', subject: 'Math', type: 'math' },
-    { day: 'Wednesday', time: '14:00-16:00', subject: 'Strength and Conditioning', type: 'fencing' },
+    { day: 'Wednesday', time: '14:00-16:00', subject: 'Strength and Conditioning', type: 'athletics' },
 
     { day: 'Thursday', time: '8:00', subject: 'History', type: 'history' },
     { day: 'Thursday', time: '9:00', subject: 'World Language', type: 'language' },
     { day: 'Thursday', time: '10:00-11:00', subject: 'College Course', type: 'college' },
     { day: 'Thursday', time: '11:00-12:00', subject: 'Science', type: 'science' },
     { day: 'Thursday', time: '13:00-14:00', subject: 'Homeroom', type: 'recess' },
-    { day: 'Thursday', time: '14:00-15:00', subject: 'Specialized training', type: 'fencing' },
+    { day: 'Thursday', time: '14:00-15:00', subject: 'Specialized training', type: 'athletics' },
     { day: 'Thursday', time: '15:00-16:00', subject: 'Volunteer', type: 'club' },
-    { day: 'Thursday', time: '16:00-17:00', subject: 'Practice', type: 'fencing' },
+    { day: 'Thursday', time: '16:00-17:00', subject: 'Practice', type: 'athletics' },
 
-    { day: 'Friday', time: '8:00-10:00', subject: 'Private Lessons', type: 'fencing' },
+    { day: 'Friday', time: '8:00-10:00', subject: 'Private Lessons', type: 'athletics' },
     { day: 'Friday', time: '10:00-11:00', subject: 'Club', type: 'club' },
     { day: 'Friday', time: '11:00-12:00', subject: 'World Language', type: 'language' },
     { day: 'Friday', time: '13:00-14:00', subject: 'Homeroom', type: 'recess' },
-    { day: 'Friday', time: '14:00-16:00', subject: 'Strength and Conditioning', type: 'fencing' },
+    { day: 'Friday', time: '14:00-16:00', subject: 'Strength and Conditioning', type: 'athletics' },
   ]);
 
   const updatedTodoItems: TodoItem[] = [
@@ -189,7 +189,12 @@ const HomeDashboardPage: React.FC = () => {
       name: 'Advanced Fencing Techniques',
       instructor: 'Coach Smith',
       progress: 65,
-      type: 'fencing',
+      type: 'athletics',
+      grade: {
+        percentage: 92,
+        letter: 'A-'
+      },
+      room: 'AFT 1300',
       nextAssignment: {
         title: 'Footwork Analysis Video',
         dueDate: '2025-04-10',
@@ -201,6 +206,11 @@ const HomeDashboardPage: React.FC = () => {
       instructor: 'Prof. Johnson',
       progress: 42,
       type: 'english',
+      grade: {
+        percentage: 88,
+        letter: 'B+'
+      },
+      room: 'ENG 210',
       nextAssignment: {
         title: 'Essay: Modern Literature',
         dueDate: '2025-04-08',
@@ -212,6 +222,11 @@ const HomeDashboardPage: React.FC = () => {
       instructor: 'Ms. Garcia',
       progress: 78,
       type: 'math',
+      grade: {
+        percentage: 95,
+        letter: 'A'
+      },
+      room: 'MATH 101',
       nextAssignment: {
         title: 'Problem Set 7',
         dueDate: '2025-04-07',
@@ -223,6 +238,11 @@ const HomeDashboardPage: React.FC = () => {
       instructor: 'Dr. Lee',
       progress: 91,
       type: 'history',
+      grade: {
+        percentage: 89,
+        letter: 'B+'
+      },
+      room: 'HIST 202',
       nextAssignment: {
         title: 'Research Project',
         dueDate: '2025-04-15',
