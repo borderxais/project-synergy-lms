@@ -27,6 +27,7 @@ dist-ssr
 db/serviceAccountKey.json
 
 services/letta/src/config/serviceAccountKey.json
+services/crew/report.md
 
 # Python cache files
 __pycache__/

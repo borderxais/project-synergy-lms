@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { TodoItem } from '../../../types/dashboard';
+import Modal from '../../common/Modal';
+
+interface CompletionTime {
+  id: string;
+  timestamp: number;
+}
 
 interface WeeklyTodoListProps {
   todoItems: TodoItem[];
   onToggleComplete: (id: string) => void;
+  onTodoUpdate: (todos: TodoItem[]) => void;
 }
 
-const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComplete }) => {
+const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComplete, onTodoUpdate }) => {
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({
     Monday: true,
     Tuesday: true,
@@ -15,6 +22,67 @@ const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComp
     Friday: true,
     'Any Day': true
   });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Track completion timestamps
+  const [completionTimes, setCompletionTimes] = useState<CompletionTime[]>([]);
+  // Track items that are being checked
+  const [checkingItems, setCheckingItems] = useState<string[]>([]);
+  // Track completed items that haven't moved to bottom yet
+  const [pendingMoveItems, setPendingMoveItems] = useState<string[]>([]);
+
+  const handleToggleComplete = (id: string) => {
+    const todo = todoItems.find(item => item.id === id);
+    if (!todo) return;
+
+    // If item is being completed
+    if (!todo.completed) {
+      // Start the check animation
+      setCheckingItems(prev => [...prev, id]);
+      // Add to pending move items
+      setPendingMoveItems(prev => [...prev, id]);
+      
+      // Call the toggle handler to update completion status
+      onToggleComplete(id);
+      
+      // Add completion timestamp immediately
+      setCompletionTimes(prev => [...prev, { id, timestamp: Date.now() }]);
+    } else {
+      // If unchecking, remove completion time and call toggle handler
+      setCompletionTimes(prev => prev.filter(item => item.id !== id));
+      setPendingMoveItems(prev => prev.filter(itemId => itemId !== id));
+      onToggleComplete(id);
+    }
+  };
+
+  const handleCheckAnimationEnd = (id: string) => {
+    setCheckingItems(prev => prev.filter(itemId => itemId !== id));
+    // After check animation, wait a moment then remove from pending
+    setTimeout(() => {
+      setPendingMoveItems(prev => prev.filter(itemId => itemId !== id));
+    }, 50); // Small delay to ensure smooth transition
+  };
+
+  const sortTodos = (todos: TodoItem[]) => {
+    // Separate completed and uncompleted items
+    const completed = todos.filter(todo => 
+      todo.completed && !pendingMoveItems.includes(todo.id)
+    );
+    const uncompleted = todos.filter(todo => 
+      !todo.completed || pendingMoveItems.includes(todo.id)
+    );
+
+    // Sort completed items by timestamp
+    const sortedCompleted = completed.sort((a, b) => {
+      const aTime = completionTimes.find(t => t.id === a.id)?.timestamp || 0;
+      const bTime = completionTimes.find(t => t.id === b.id)?.timestamp || 0;
+      return aTime - bTime; // Earlier timestamps go to the top
+    });
+
+    // Return uncompleted items first, then sorted completed items
+    return [...uncompleted, ...sortedCompleted];
+  };
 
   const toggleDayExpanded = (day: string) => {
     setExpandedDays((prev) => ({
@@ -28,8 +96,33 @@ const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComp
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Weekly To-Do List</h2>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            title="Add Todo Item"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+          </button>
+        </div>
+
         {days.map((day) => {
           const dayTodos = todoItems.filter((item) => item.day === day);
+          const sortedDayTodos = sortTodos(dayTodos);
 
           return (
             <div key={day} className="mb-4 last:mb-0 border rounded-lg overflow-hidden">
@@ -61,12 +154,14 @@ const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComp
 
               {expandedDays[day] && (
                 <div className="divide-y">
-                  {dayTodos.length > 0 ? (
-                    dayTodos.map((todo) => (
+                  {sortedDayTodos.length > 0 ? (
+                    sortedDayTodos.map((todo) => (
                       <TodoItemComponent 
                         key={todo.id} 
                         todo={todo} 
-                        onToggleComplete={onToggleComplete} 
+                        onToggleComplete={handleToggleComplete}
+                        onCheckAnimationEnd={() => handleCheckAnimationEnd(todo.id)}
+                        isChecking={checkingItems.includes(todo.id)}
                       />
                     ))
                   ) : (
@@ -112,19 +207,31 @@ const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComp
 
             {expandedDays['Any Day'] && (
               <div className="divide-y">
-                {todoItems
-                  .filter((item) => item.day === 'Any Day')
+                {sortTodos(todoItems.filter((item) => item.day === 'Any Day'))
                   .map((todo) => (
                     <TodoItemComponent 
                       key={todo.id} 
                       todo={todo} 
-                      onToggleComplete={onToggleComplete} 
+                      onToggleComplete={handleToggleComplete}
+                      onCheckAnimationEnd={() => handleCheckAnimationEnd(todo.id)}
+                      isChecking={checkingItems.includes(todo.id)}
                     />
                   ))}
               </div>
             )}
           </div>
         )}
+
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Add Todo Item"
+        >
+          <div className="space-y-4">
+            {/* Content will be added based on your requirements */}
+            <p className="text-gray-500 italic">Modal content will be implemented as specified.</p>
+          </div>
+        </Modal>
       </div>
     </div>
   );
@@ -133,19 +240,27 @@ const WeeklyTodoList: React.FC<WeeklyTodoListProps> = ({ todoItems, onToggleComp
 interface TodoItemComponentProps {
   todo: TodoItem;
   onToggleComplete: (id: string) => void;
+  onCheckAnimationEnd: () => void;
+  isChecking: boolean;
 }
 
-const TodoItemComponent: React.FC<TodoItemComponentProps> = ({ todo, onToggleComplete }) => {
+const TodoItemComponent: React.FC<TodoItemComponentProps> = ({ 
+  todo, 
+  onToggleComplete, 
+  onCheckAnimationEnd,
+  isChecking
+}) => {
   return (
     <div
-      className={`p-4 transition-colors ${
+      className={`p-4 transition-all duration-1000 ${
         todo.completed ? 'bg-green-50' : 'bg-white'
-      }`}
+      } ${isChecking ? 'animate-check-todo' : ''}`}
+      onAnimationEnd={onCheckAnimationEnd}
     >
       <div className="flex items-start">
         <div className="flex-1">
           <h4
-            className={`font-medium ${
+            className={`font-medium transition-all duration-1000 ${
               todo.completed ? 'line-through text-gray-500' : 'text-gray-900'
             }`}
           >
@@ -161,7 +276,7 @@ const TodoItemComponent: React.FC<TodoItemComponentProps> = ({ todo, onToggleCom
                 {todo.suggestions.map((suggestion, idx) => (
                   <li
                     key={idx}
-                    className={`text-sm pl-4 ${
+                    className={`text-sm pl-4 transition-all duration-1000 ${
                       todo.completed ? 'text-gray-400 line-through' : 'text-gray-600'
                     }`}
                   >
@@ -174,7 +289,7 @@ const TodoItemComponent: React.FC<TodoItemComponentProps> = ({ todo, onToggleCom
         </div>
         <div>
           <button
-            className={`h-6 w-6 rounded-full border ${
+            className={`h-6 w-6 rounded-full border transition-all duration-1000 ${
               todo.completed
                 ? 'bg-blue-500 border-blue-500 text-white'
                 : 'border-gray-300'
