@@ -118,9 +118,14 @@ const CurrentCourses: React.FC<CurrentCoursesProps> = ({ courses, onCoursesUpdat
                     <p className="text-sm opacity-90 inherit-text-color">Room: {course.room}</p>
                   )}
                 </div>
-                <div className="bg-white bg-opacity-20 px-2.5 py-0.5 rounded-full flex-shrink-0 inherit-text-color">
-                  <span className="text-sm font-medium">{course.grade.letter}</span>
-                </div>
+                  <div className="bg-white bg-opacity-20 px-2.5 py-0.5 rounded-full flex-shrink-0 inherit-text-color">
+                    <span className="text-sm font-medium">
+                      {typeof course.grade === 'object' 
+                        ? course.grade?.letter || 'N/A'
+                        : course.grade || 'N/A'
+                      }
+                    </span>
+                  </div>
               </div>
             </div>
 
