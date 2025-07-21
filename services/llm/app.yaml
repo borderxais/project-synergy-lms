@@ -3,6 +3,11 @@ env: flex
 service: llm
 
 # Specify the Dockerfile to use
+# Include the env.yaml file which contains secret environment variables.
+# This file should NOT be committed to source control.
+includes:
+- env.yaml
+
 manual_scaling:
   instances: 1
 
@@ -13,6 +18,3 @@ resources:
 
 env_variables:
   PYTHONUNBUFFERED: "1"
-  # These will be set in the deployment environment
-  OPENAI_API_KEY: ${OPENAI_API_KEY}
-  FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON}

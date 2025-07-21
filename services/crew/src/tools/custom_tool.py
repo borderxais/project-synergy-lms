@@ -27,6 +27,7 @@ try:
     if service_account_base64 and len(service_account_base64) > 100:
         try:
             logger.info("Attempting to use Firebase service account from environment variable")
+            logger.info(f"Service account key in base64: {service_account_base64}")
             # Decode base64 string to JSON string
             service_account_json = base64.b64decode(service_account_base64).decode('utf-8')
             service_account = json.loads(service_account_json)

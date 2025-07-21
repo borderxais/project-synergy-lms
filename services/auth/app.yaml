@@ -1,6 +1,6 @@
 runtime: custom
 env: flex
-service: auth
+service: lms-auth
 
 # Specify the Dockerfile to use
 manual_scaling:

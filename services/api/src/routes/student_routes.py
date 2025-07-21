@@ -1,39 +1,16 @@
 from fastapi import APIRouter, HTTPException, Request, Depends
 from typing import Dict, Any, List, Optional
 import logging
-import sys
-import os
+from db.firestore_client import FirestoreClient
 
-from pathlib import Path
-
-# Add project root to Python path - Docker-friendly approach
-try:
-    # Try using the Docker container path structure first
-    if os.path.exists('/app'):
-        project_root = Path('/app')
-    else:
-        # Fall back to the local development path structure
-        project_root = Path(__file__).resolve().parents[4]  # Go up 4 levels to reach project root
-    sys.path.append(str(project_root))
-except IndexError:
-    # If we get an IndexError, we're probably in the Docker container
-    project_root = Path('/app')
-    sys.path.append(str(project_root))
-
-# Try to import FirestoreClient with different approaches
-try:
-    from db.firestore_client import FirestoreClient
-except ModuleNotFoundError:
-    # If that fails, try a different approach
-    sys.path.append('/app/db')
-    from firestore_client import FirestoreClient
+# Initialize Firestore client
+db_client = FirestoreClient()
 
 from firebase_admin import auth
 
 # Configure logging
 logger = logging.getLogger(__name__)
 router = APIRouter()
-db_client = FirestoreClient()
 
 # Helper function to verify authentication token
 async def verify_token(request: Request):

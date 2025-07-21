@@ -1,12 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import sys
 import os
 import logging
-
-# Add the auth service directory to the Python path to import shared components
-auth_service_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../auth/src"))
-sys.path.append(auth_service_path)
 
 # Import routes
 from src.routes import student_routes, school_routes, onboarding_routes, recommendation_routes
@@ -28,7 +23,12 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update with specific origins in production
+    allow_origins=[
+        "https://privschoolprep.com",
+        "http://localhost:3000", # Common for React
+        "http://localhost:8080", # Common for Angular/Vue
+        "http://localhost:5173"  # Common for Vite
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
