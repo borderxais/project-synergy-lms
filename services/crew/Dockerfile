@@ -2,18 +2,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy and install requirements
+# Copy and install requirements. Paths are relative to the Docker build context.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
+# Copy source code and the db directory
 COPY src/ ./src/
+COPY db/ ./db/
 
-# Set Python path to include src directory
+# Set Python path to include the root app directory, allowing imports from src and db
 ENV PYTHONPATH=/app
 
-# Expose port - App Engine will use the PORT env variable
-EXPOSE 8080
-
-# Run the application using the PORT environment variable
-CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8003} --reload"]
+# The PORT environment variable is set by App Engine.
+# The default is 8080. Your application must listen on this port.
+# The --reload flag is removed for production.
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]

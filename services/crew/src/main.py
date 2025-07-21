@@ -22,10 +22,15 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Configure CORS
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update with specific origins in production
+    allow_origins=[
+        "https://privschoolprep.com",
+        "http://localhost:3000", # Common for React
+        "http://localhost:8080", # Common for Angular/Vue
+        "http://localhost:5173"  # Common for Vite
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

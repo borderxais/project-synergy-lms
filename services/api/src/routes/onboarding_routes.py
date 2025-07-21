@@ -7,6 +7,7 @@ import httpx
 from datetime import datetime
 import json
 from pathlib import Path
+from ..config import CREW_SERVICE_URL, LLM_SERVICE_URL
 
 # Add project root to Python path - fix for Docker container structure
 # In Docker, the directory structure is different, so we need a more robust approach
@@ -132,18 +133,20 @@ async def submit_onboarding(request: Request, token: Dict = Depends(verify_token
             if college_data:
                 # Call LLM service to generate roadmap
                 try:
-                    async with httpx.AsyncClient(timeout=60.0) as client:
-                        roadmap_response = await client.post(
-                            "http://crew:8003/api/crew/roadmap",
-                            json={
-                                "userId": user_id,
-                                "targetSchools": target_schools,
-                                "schoolInfo": college_data
-                            },
-                            headers={"Content-Type": "application/json"}
+                    async with httpx.AsyncClient(timeout=300.0) as client:
+                        roadmap_payload = {
+                            "userId": user_id,
+                            "targetSchools": target_schools,
+                            "schoolInfo": college_data
+                        }
+                        roadmap_url = f"{CREW_SERVICE_URL}/api/crew/roadmap"
+                        logger.info(f"Calling crew service at {roadmap_url}")
+                        response = await client.post(
+                            roadmap_url,
+                            json=roadmap_payload,
                         )
                         
-                        if roadmap_response.status_code == 200:
+                        if response.status_code == 200:
                             logger.info("Roadmap generated and saved successfully")
                             
                 except Exception as e:
@@ -183,21 +186,23 @@ async def analyze_schools(request: Request, token: Dict = Depends(verify_token))
         
         # Call LLM service to analyze schools
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                analysis_response = await client.post(
-                    "http://llm:8002/analyze-schools",
-                    json={"schools": school_data},
-                    headers={"Content-Type": "application/json"}
-                )
-                
-                if analysis_response.status_code == 200:
-                    analysis_data = analysis_response.json()
-                    return analysis_data
-                else:
-                    raise HTTPException(
-                        status_code=analysis_response.status_code,
-                        detail=f"Error from LLM service: {analysis_response.text}"
+            async with httpx.AsyncClient(timeout=300.0) as client:
+                for school in school_data:
+                    analysis_url = f"{LLM_SERVICE_URL}/analyze-schools"
+                    logger.info(f"Calling LLM service at {analysis_url}")
+                    analysis_response = await client.post(
+                        analysis_url,
+                        json=school,
                     )
+
+                    if analysis_response.status_code == 200:
+                        analysis_data = analysis_response.json()
+                        return analysis_data
+                    else:
+                        raise HTTPException(
+                            status_code=analysis_response.status_code,
+                            detail=f"Error from LLM service: {analysis_response.text}"
+                        )
         except httpx.RequestError as e:
             logger.error(f"Error calling LLM service: {e}")
             raise HTTPException(status_code=503, detail="LLM service unavailable")

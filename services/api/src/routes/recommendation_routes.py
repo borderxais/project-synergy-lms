@@ -7,6 +7,7 @@ import httpx
 from datetime import datetime
 import json
 from pathlib import Path
+from ..config import CREW_SERVICE_URL
 
 # Add project root to Python path - fix for Docker container structure
 try:
@@ -81,9 +82,11 @@ async def get_crew_recommendations(request: Request, token: Dict = Depends(verif
         
         # Call crew service for recommendations
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                crew_response = await client.post(
-                    "http://crew:8003/api/crew/recommendations",
+            async with httpx.AsyncClient(timeout=300.0) as client:
+                recommendation_url = f"{CREW_SERVICE_URL}/api/crew/recommendations"
+                logger.info(f"Calling crew service at {recommendation_url}")
+                response = await client.post(
+                    recommendation_url,
                     json={
                         "userId": user_id,
                         "gpa": data.get('gpa'),
@@ -91,16 +94,15 @@ async def get_crew_recommendations(request: Request, token: Dict = Depends(verif
                         "act": data.get('act'),
                         "interests": data.get('interests', [])
                     },
-                    headers={"Content-Type": "application/json"}
                 )
 
-                if crew_response.status_code == 200:
-                    recommendations = crew_response.json()
+                if response.status_code == 200:
+                    recommendations = response.json()
                     return recommendations
                 else:
                     raise HTTPException(
-                        status_code=crew_response.status_code,
-                        detail=f"Error from crew service: {crew_response.text}"
+                        status_code=response.status_code,
+                        detail=f"Error from crew service: {response.text}"
                     )
         except httpx.RequestError as e:
             logger.error(f"Error calling crew service: {e}")
@@ -138,5 +140,3 @@ async def get_user_recommendations(user_id: str, token: Dict = Depends(verify_to
     except Exception as e:
         logger.error(f"Error getting user recommendations: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
