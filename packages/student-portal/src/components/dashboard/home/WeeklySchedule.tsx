@@ -168,7 +168,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
           </svg>
         </button>
       </div>
-
+{/* 
       <div className="w-full flex-grow">
         <table className="w-full divide-y divide-gray-200 h-full">
           <thead className="bg-gray-50">
@@ -215,7 +215,83 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
             ))}
           </tbody>
         </table>
+      </div> */}
+
+      {/* Grid container */}
+      <div className="w-full flex-grow overflow-auto">
+        <div
+          className="grid min-w-[800px]"
+          style={{
+            gridTemplateColumns: `80px repeat(${DAYS.length}, minmax(120px, 1fr))`,
+            gridTemplateRows: `50px repeat(${TIME_SLOTS.length}, 50px)`,
+          }}
+        >
+          {/* Top-left empty cell */}
+          <div className="border-b border-r border-gray-200 bg-gray-50" style={{ gridColumn: 1, gridRow: 1 }} />
+
+          {/* Day headers */}
+          {DAYS.map((day, index) => (
+            <div
+              key={`header-${day}`}
+              className="border-b border-r border-gray-200 text-center text-xs font-medium text-gray-500 bg-gray-50 flex items-center justify-center"
+              style={{ gridColumn: index + 2, gridRow: 1 }}
+            >
+              {day}
+            </div>
+          ))}
+
+          {/* Time labels - fixed in first column */}
+          {TIME_SLOTS.map((slot, i) => (
+            <div
+              key={`time-${i}`}
+              className="border-b border-r border-gray-200 text-sm px-2 flex items-center justify-center text-gray-500 bg-gray-50"
+              style={{
+                gridColumn: 1,
+                gridRow: i + 2, // +2 to account for header row
+              }}
+            >
+              {slot.endsWith(':00') ? slot : ''}
+            </div>
+          ))}
+
+          {/* Empty grid cells */}
+          {DAYS.map((day, dayIndex) =>
+            TIME_SLOTS.map((_, timeIndex) => (
+              <div
+                key={`${day}-${timeIndex}`}
+                className="border-b border-r border-gray-100"
+                style={{
+                  gridColumn: dayIndex + 2,
+                  gridRow: timeIndex + 2,
+                }}
+              />
+            ))
+          )}
+
+          {/* Schedule items */}
+          {schedule.map((item) => {
+            const col = DAYS.indexOf(item.day) + 2; // +2 for time column and 1-based index
+            const pos = getItemPosition(item.time);
+            return (
+              <div
+                key={item.id}
+                className={`${getColorClass(item.type, customTypeColors[item.type] || undefined)} 
+                  px-2 py-1 mx-1 my-0.5 mx-auto rounded-md cursor-pointer text-sm flex items-center justify-center text-center hover:opacity-80 transition-opacity`}
+                style={{
+                  gridColumn: col,
+                  gridRowStart: pos.gridRowStart + 1, // +1 to offset for header row
+                  gridRowEnd: pos.gridRowEnd + 1,
+                }}
+                onClick={() => handleScheduleItemClick(item)}
+              >
+                {item.subject}
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Schedule key and modals */}
       <div className="p-4 border-t">
         <h3 className="text-sm font-medium text-gray-700 mb-2">Schedule Key:</h3>
         <div className="flex flex-wrap gap-2">
