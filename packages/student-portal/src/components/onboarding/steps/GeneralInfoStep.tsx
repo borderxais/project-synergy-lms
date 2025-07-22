@@ -11,13 +11,66 @@ const GENDERS: Gender[] = ['Male', 'Female', 'Other', 'PreferNotToSay'];
 const GRADES = Array.from({ length: 12 }, (_, i) => i + 1);
 
 export function GeneralInfoStep({ formData, updateFormData }: GeneralInfoStepProps) {
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+
   const handleUpdate = (field: keyof GeneralStudentInfo, value: any) => {
+    // Clear error when field is updated
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+
     updateFormData({
       generalInfo: {
         ...formData.generalInfo,
         [field]: value,
       },
     });
+  };
+
+  const validateField = (field: keyof GeneralStudentInfo, value: any) => {
+    switch (field) {
+      case 'firstName':
+        if (!value?.trim()) {
+          setErrors(prev => ({ ...prev, [field]: 'Please enter your first name' }));
+          return false;
+        }
+        return true;
+      case 'lastName':
+        if (!value?.trim()) {
+          setErrors(prev => ({ ...prev, [field]: 'Please enter your last name' }));
+          return false;
+        }
+        return true;
+      case 'grade':
+        if (!value) {
+          setErrors(prev => ({ ...prev, [field]: 'Please select a grade' }));
+          return false;
+        }
+        return true;
+      case 'currentSchool':
+        if (formData.generalInfo?.schoolType && formData.generalInfo.schoolType !== 'Homeschool' && !value?.trim()) {
+          setErrors(prev => ({ ...prev, [field]: 'School name is required' }));
+          return false;
+        }
+        return true;
+      case 'schoolType':
+        if (!value) {
+          setErrors(prev => ({ ...prev, [field]: 'Please select a school type' }));
+          return false;
+        }
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  const handleBlur = (field: keyof GeneralStudentInfo) => {
+    const value = formData.generalInfo?.[field];
+    validateField(field, value);
   };
 
   return (
@@ -33,38 +86,42 @@ export function GeneralInfoStep({ formData, updateFormData }: GeneralInfoStepPro
         {/* First Name */}
         <div>
           <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-            First Name
+            First Name *
           </label>
           <input
             type="text"
             id="firstName"
             value={formData.generalInfo?.firstName || ''}
             onChange={(e) => handleUpdate('firstName', e.target.value)}
+            onBlur={() => handleBlur('firstName')}
             className={`mt-1 block w-full rounded-md shadow-sm ${
-              formData.errors?.firstName ? 'border-red-300' : 'border-gray-300'
+              errors.firstName ? 'border-red-300' : 'border-gray-300'
             } focus:border-blue-500 focus:ring-blue-500 sm:text-sm`}
+            required
           />
-          {formData.errors?.firstName && (
-            <p className="mt-2 text-sm text-red-600">{formData.errors.firstName}</p>
+          {errors.firstName && (
+            <p className="mt-2 text-sm text-red-600">{errors.firstName}</p>
           )}
         </div>
 
         {/* Last Name */}
         <div>
           <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-            Last Name
+            Last Name *
           </label>
           <input
             type="text"
             id="lastName"
             value={formData.generalInfo?.lastName || ''}
             onChange={(e) => handleUpdate('lastName', e.target.value)}
+            onBlur={() => handleBlur('lastName')}
             className={`mt-1 block w-full rounded-md shadow-sm ${
-              formData.errors?.lastName ? 'border-red-300' : 'border-gray-300'
+              errors.lastName ? 'border-red-300' : 'border-gray-300'
             } focus:border-blue-500 focus:ring-blue-500 sm:text-sm`}
+            required
           />
-          {formData.errors?.lastName && (
-            <p className="mt-2 text-sm text-red-600">{formData.errors.lastName}</p>
+          {errors.lastName && (
+            <p className="mt-2 text-sm text-red-600">{errors.lastName}</p>
           )}
         </div>
 
@@ -77,9 +134,7 @@ export function GeneralInfoStep({ formData, updateFormData }: GeneralInfoStepPro
             id="gender"
             value={formData.generalInfo?.gender || ''}
             onChange={(e) => handleUpdate('gender', e.target.value as Gender)}
-            className={`mt-1 block w-full rounded-md shadow-sm ${
-              formData.errors?.gender ? 'border-red-300' : 'border-gray-300'
-            } focus:border-blue-500 focus:ring-blue-500 sm:text-sm`}
+            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             <option value="">Select Gender</option>
             {GENDERS.map((gender) => (
@@ -88,23 +143,22 @@ export function GeneralInfoStep({ formData, updateFormData }: GeneralInfoStepPro
               </option>
             ))}
           </select>
-          {formData.errors?.gender && (
-            <p className="mt-2 text-sm text-red-600">{formData.errors.gender}</p>
-          )}
         </div>
 
         {/* Grade */}
         <div>
           <label htmlFor="grade" className="block text-sm font-medium text-gray-700">
-            Grade
+            Grade *
           </label>
           <select
             id="grade"
             value={formData.generalInfo?.grade || ''}
             onChange={(e) => handleUpdate('grade', parseInt(e.target.value))}
+            onBlur={() => handleBlur('grade')}
             className={`mt-1 block w-full rounded-md shadow-sm ${
-              formData.errors?.grade ? 'border-red-300' : 'border-gray-300'
+              errors.grade ? 'border-red-300' : 'border-gray-300'
             } focus:border-blue-500 focus:ring-blue-500 sm:text-sm`}
+            required
           >
             <option value="">Select Grade</option>
             {GRADES.map((grade) => (
@@ -113,41 +167,54 @@ export function GeneralInfoStep({ formData, updateFormData }: GeneralInfoStepPro
               </option>
             ))}
           </select>
-          {formData.errors?.grade && (
-            <p className="mt-2 text-sm text-red-600">{formData.errors.grade}</p>
+          {errors.grade && (
+            <p className="mt-2 text-sm text-red-600">{errors.grade}</p>
           )}
         </div>
 
-        {/* Current School */}
+        {/* Current School - conditionally required */}
         <div>
           <label htmlFor="currentSchool" className="block text-sm font-medium text-gray-700">
-            Current School
+            Current School {formData.generalInfo?.schoolType && formData.generalInfo.schoolType !== 'Homeschool' ? '*' : ''}
           </label>
           <input
             type="text"
             id="currentSchool"
             value={formData.generalInfo?.currentSchool || ''}
             onChange={(e) => handleUpdate('currentSchool', e.target.value)}
+            onBlur={() => handleBlur('currentSchool')}
             className={`mt-1 block w-full rounded-md shadow-sm ${
-              formData.errors?.currentSchool ? 'border-red-300' : 'border-gray-300'
+              errors.currentSchool ? 'border-red-300' : 'border-gray-300'
             } focus:border-blue-500 focus:ring-blue-500 sm:text-sm`}
+            required
           />
-          {formData.errors?.currentSchool && (
-            <p className="mt-2 text-sm text-red-600">{formData.errors.currentSchool}</p>
+          {errors.currentSchool && (
+            <p className="mt-2 text-sm text-red-600">{errors.currentSchool}</p>
           )}
         </div>
 
         {/* School Type */}
         <div>
           <label htmlFor="schoolType" className="block text-sm font-medium text-gray-700">
-            School Type
+            School Type *
           </label>
           <select
             id="schoolType"
             value={formData.generalInfo?.schoolType || ''}
-            onChange={(e) => handleUpdate('schoolType', e.target.value as SchoolType)}
+            onChange={(e) => {
+              handleUpdate('schoolType', e.target.value as SchoolType);
+              // Clear current school error if switching to homeschool
+              if (e.target.value === 'Homeschool' && errors.currentSchool) {
+                setErrors(prev => {
+                  const newErrors = { ...prev };
+                  delete newErrors.currentSchool;
+                  return newErrors;
+                });
+              }
+            }}
+            onBlur={() => handleBlur('schoolType')}
             className={`mt-1 block w-full rounded-md shadow-sm ${
-              formData.errors?.schoolType ? 'border-red-300' : 'border-gray-300'
+              errors.schoolType ? 'border-red-300' : 'border-gray-300'
             } focus:border-blue-500 focus:ring-blue-500 sm:text-sm`}
           >
             <option value="">Select School Type</option>
@@ -157,10 +224,15 @@ export function GeneralInfoStep({ formData, updateFormData }: GeneralInfoStepPro
               </option>
             ))}
           </select>
-          {formData.errors?.schoolType && (
-            <p className="mt-2 text-sm text-red-600">{formData.errors.schoolType}</p>
+          {errors.schoolType && (
+            <p className="mt-2 text-sm text-red-600">{errors.schoolType}</p>
           )}
         </div>
+      </div>
+
+      {/* Required fields note */}
+      <div className="text-sm text-gray-500 mt-4">
+        <span className="text-red-500">*</span> indicates required fields
       </div>
     </div>
   );
