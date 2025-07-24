@@ -236,6 +236,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                 className={`${getColorClass(item.type, customTypeColors[item.type] || undefined)} 
                   px-2 py-1 mx-1 my-0.5 mx-auto rounded-md cursor-pointer text-sm flex flex-col items-center justify-center text-center hover:opacity-80 transition-opacity`}
                 style={{
+                  width: '160px',
                   gridColumn: col,
                   gridRowStart: pos.gridRowStart + 1, // +1 to offset for header row
                   gridRowEnd: pos.gridRowEnd + 1,
