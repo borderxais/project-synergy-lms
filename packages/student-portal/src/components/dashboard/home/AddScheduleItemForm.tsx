@@ -71,13 +71,20 @@ const AddScheduleItemForm: React.FC<AddScheduleItemFormProps> = ({
     // Check for time slot conflicts
     const timeConflict = existingSchedule.some(item => {
       if (item.day !== formData.day) return false;
-      
-      const itemStart = item.time.split('-')[0];
-      const itemEnd = item.time.split('-')[1] || itemStart;
-      const newItemEnd = formData.endTime || formData.startTime;
-
-      return (formData.startTime >= itemStart && formData.startTime <= itemEnd) ||
-             (newItemEnd >= itemStart && newItemEnd <= itemEnd);
+      const [itemStart, itemEnd] = item.time.split('-');
+      const [newStart, newEnd] = [formData.startTime, formData.endTime];
+      if (!itemEnd || !newEnd) return false;
+      // Convert to minutes
+      const toMinutes = (t: string) => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      };
+      const itemStartMin = toMinutes(itemStart);
+      const itemEndMin = toMinutes(itemEnd);
+      const newStartMin = toMinutes(newStart);
+      const newEndMin = toMinutes(newEnd);
+      // End time is exclusive: [start, end)
+      return newStartMin < itemEndMin && newEndMin > itemStartMin;
     });
 
     if (timeConflict) {
@@ -188,7 +195,7 @@ const AddScheduleItemForm: React.FC<AddScheduleItemFormProps> = ({
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Room
+            Room (Optional)
           </label>
           <input
             type="text"
@@ -210,6 +217,7 @@ const AddScheduleItemForm: React.FC<AddScheduleItemFormProps> = ({
             type="text"
             value={formData.subject}
             onChange={e => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+            placeholder="e.g., English 3"
             className={`w-full rounded-md border ${
               errors.subject ? 'border-red-500' : 'border-gray-300'
             } px-3 py-2`}

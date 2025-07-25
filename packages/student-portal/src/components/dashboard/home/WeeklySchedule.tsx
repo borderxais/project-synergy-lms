@@ -117,11 +117,15 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
           DAYS.indexOf(item.day) >= DAYS.indexOf(selectedScheduleItem.day))
       );
     } else {
-      // Delete only this specific event
+      // Delete only this specific event (match by all unique fields)
       newSchedule = schedule.filter(item => 
-        !(item.day === selectedScheduleItem.day && 
+        !(
+          item.day === selectedScheduleItem.day && 
           item.time === selectedScheduleItem.time && 
-          item.subject === selectedScheduleItem.subject)
+          item.subject === selectedScheduleItem.subject &&
+          item.type === selectedScheduleItem.type &&
+          (typeof (item as any).id === 'undefined' || (item as any).id === (selectedScheduleItem as any).id)
+        )
       );
     }
 
@@ -169,53 +173,85 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
         </button>
       </div>
 
-      <div className="w-full flex-grow">
-        <table className="w-full divide-y divide-gray-200 h-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
-                Time
-              </th>
-              {DAYS.map((day) => (
-                <th key={day} className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {day}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          
-          <tbody className="bg-white divide-y divide-gray-200">
-            {['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map((time) => (
-              <tr key={time}>
-                <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {time}
-                </td>
-                {DAYS.map((day) => {
-                  const item = schedule.find((s) => s.day === day && (
-                    s.time.startsWith(time) || // Exact hour match
-                    (s.time.includes('-') && s.time.split('-')[0] === time) // Start of range
-                  ));
-                  return (
-                    <td key={`${day}-${time}`} className="px-2 h-16 text-sm text-gray-500 relative">
-                      {item && (
-                        <div 
-                          className={`${getColorClass(item.type, customTypeColors[item.type] || undefined)} 
-                            ${getTimeSlotHeight(item.time)}
-                            px-2 w-[150px] mx-auto flex items-center justify-center 
-                            rounded-md cursor-pointer hover:opacity-80 transition-opacity text-center`}
-                          onClick={() => handleScheduleItemClick(item)}
-                        >
-                          {item.subject}
-                        </div>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Grid container */}
+      <div className="w-full flex-grow overflow-auto">
+        <div
+          className="grid min-w-[800px]"
+          style={{
+            gridTemplateColumns: `80px repeat(${DAYS.length}, minmax(120px, 1fr))`,
+            gridTemplateRows: `50px repeat(${TIME_SLOTS.length}, 50px)`,
+          }}
+        >
+          {/* Top-left empty cell */}
+          <div className="border-b border-r border-gray-200 bg-gray-50" style={{ gridColumn: 1, gridRow: 1 }} />
+
+          {/* Day headers */}
+          {DAYS.map((day, index) => (
+            <div
+              key={`header-${day}`}
+              className="border-b border-r border-gray-200 text-center text-xs font-medium text-gray-500 bg-gray-50 flex items-center justify-center uppercase tracking-wider"
+              style={{ gridColumn: index + 2, gridRow: 1 }}
+            >
+              {day}
+            </div>
+          ))}
+
+          {/* Time labels - fixed in first column */}
+          {TIME_SLOTS.map((slot, i) => (
+            <div
+              key={`time-${i}`}
+              className="border-b border-r border-gray-200 text-sm px-2 flex items-center justify-center text-gray-500 bg-gray-50"
+              style={{
+                gridColumn: 1,
+                gridRow: i + 2, // +2 to account for header row
+              }}
+            >
+              {slot.endsWith(':00') ? slot : ''}
+            </div>
+          ))}
+
+          {/* Empty grid cells */}
+          {DAYS.map((day, dayIndex) =>
+            TIME_SLOTS.map((_, timeIndex) => (
+              <div
+                key={`${day}-${timeIndex}`}
+                className="border-b border-r border-gray-100"
+                style={{
+                  gridColumn: dayIndex + 2,
+                  gridRow: timeIndex + 2,
+                }}
+              />
+            ))
+          )}
+
+          {/* Schedule items */}
+          {schedule.map((item) => {
+            const col = DAYS.indexOf(item.day) + 2; // +2 for time column and 1-based index
+            const pos = getItemPosition(item.time);
+            // Use item.id if present, otherwise fallback to a composite key
+            const key = (item as any).id || `${item.day}-${item.time}-${item.subject}`;
+            return (
+              <div
+                key={key}
+                className={`${getColorClass(item.type, customTypeColors[item.type] || undefined)} 
+                  px-2 py-1 mx-1 my-0.5 mx-auto rounded-md cursor-pointer text-sm flex flex-col items-center justify-center text-center hover:opacity-80 transition-opacity`}
+                style={{
+                  width: '160px',
+                  gridColumn: col,
+                  gridRowStart: pos.gridRowStart + 1, // +1 to offset for header row
+                  gridRowEnd: pos.gridRowEnd + 1,
+                }}
+                onClick={() => handleScheduleItemClick(item)}
+              >
+                <span className="block text-xs font-semibold mb-1">{item.time}</span>
+                <span>{item.subject}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Schedule key and modals */}
       <div className="p-4 border-t">
         <h3 className="text-sm font-medium text-gray-700 mb-2">Schedule Key:</h3>
         <div className="flex flex-wrap gap-2">
