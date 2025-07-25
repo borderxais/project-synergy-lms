@@ -2,7 +2,7 @@ services:
   auth:
     build:
       context: .
-      dockerfile: services/auth/dockerfile
+      dockerfile: services/auth/Dockerfile
     ports:
       - "3001:8000"
     volumes:
@@ -33,7 +33,7 @@ services:
   llm:
     build:
       context: .
-      dockerfile: services/llm/dockerfile
+      dockerfile: services/llm/Dockerfile
     ports:
       - "3003:8002"
     volumes:
