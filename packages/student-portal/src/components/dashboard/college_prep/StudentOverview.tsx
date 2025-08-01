@@ -14,6 +14,10 @@ interface StudentOverviewProps {
 
 const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = [], onUpdate }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAcademicModalOpen, setIsAcademicModalOpen] = useState(false);
+  const [isRecommendationsModalOpen, setIsRecommendationsModalOpen] = useState(false);
+  const [isTargetSchoolsModalOpen, setIsTargetSchoolsModalOpen] = useState(false);
   const [customTypeColors, setCustomTypeColors] = useState<Record<string, string | null>>({});
   const [localCourses, setLocalCourses] = useState<Course[]>(courses);
 
@@ -66,11 +70,8 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                 <span className="ml-2 text-gray-500 text-base">学生档案</span>
               </h2>
               <button
-                onClick={() => {
-                  // TODO: Add edit functionality for student profile
-                  console.log('Edit student profile clicked');
-                }}
-                className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                onClick={() => setIsProfileModalOpen(true)}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110"
                 title="Edit Profile"
               >
                 <svg
@@ -169,11 +170,8 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                 <span className="ml-2 text-gray-500 text-base">学术状态</span>
               </h2>
               <button
-                onClick={() => {
-                  // TODO: Add edit functionality for academic stats
-                  console.log('Edit academic stats clicked');
-                }}
-                className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                onClick={() => setIsAcademicModalOpen(true)}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110"
                 title="Edit Academic Stats"
               >
                 <svg
@@ -256,7 +254,6 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
 
       {/* Personalized Recommendations - Enhanced Visual Design */}
       <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 shadow-sm border border-indigo-100">
-      {/* <div className="bg-gradient-to-r from-yellow-50 to-gray-50 rounded-xl p-6 shadow-sm border border-indigo-100"> */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center">
             <svg className="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,11 +263,8 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
             <span className="ml-2 text-gray-500 text-base">个性化建议</span>
           </h2>
           <button
-            onClick={() => {
-              // TODO: Add edit functionality for recommendations
-              console.log('Edit recommendations clicked');
-            }}
-            className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            onClick={() => setIsRecommendationsModalOpen(true)}
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110"
             title="Edit Recommendations"
           >
             <svg
@@ -317,7 +311,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
           </h2>
           <button
             onClick={() => setIsEditModalOpen(true)}
-            className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110"
             title="Edit Courses"
           >
             <svg
@@ -400,11 +394,8 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
             <span className="ml-2 text-gray-500 text-base">目标学校</span>
           </h2>
           <button
-            onClick={() => {
-              // TODO: Add edit functionality for target schools
-              console.log('Edit target schools clicked');
-            }}
-            className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            onClick={() => setIsTargetSchoolsModalOpen(true)}
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110"
             title="Edit Target Schools"
           >
             <svg
@@ -530,6 +521,107 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      {/* Profile Edit Modal */}
+      <Modal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} title="Edit Student Profile">
+        <div className="space-y-4">
+          <p className="text-gray-600">Edit student profile information including personal details, interests, and study preferences.</p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setIsProfileModalOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                // TODO: Implement profile update logic
+                console.log('Profile updated');
+                setIsProfileModalOpen(false);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Academic Stats Edit Modal */}
+      <Modal isOpen={isAcademicModalOpen} onClose={() => setIsAcademicModalOpen(false)} title="Edit Academic Stats">
+        <div className="space-y-4">
+          <p className="text-gray-600">Edit academic statistics including GPA, test scores, and planned tests.</p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setIsAcademicModalOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                // TODO: Implement academic stats update logic
+                console.log('Academic stats updated');
+                setIsAcademicModalOpen(false);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Recommendations Edit Modal */}
+      <Modal isOpen={isRecommendationsModalOpen} onClose={() => setIsRecommendationsModalOpen(false)} title="Edit Recommendations">
+        <div className="space-y-4">
+          <p className="text-gray-600">Manage personalized recommendations and their priority levels.</p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setIsRecommendationsModalOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                // TODO: Implement recommendations update logic
+                console.log('Recommendations updated');
+                setIsRecommendationsModalOpen(false);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Target Schools Edit Modal */}
+      <Modal isOpen={isTargetSchoolsModalOpen} onClose={() => setIsTargetSchoolsModalOpen(false)} title="Edit Target Schools">
+        <div className="space-y-4">
+          <p className="text-gray-600">Add, edit, or remove target schools and their match criteria.</p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setIsTargetSchoolsModalOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                // TODO: Implement target schools update logic
+                console.log('Target schools updated');
+                setIsTargetSchoolsModalOpen(false);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
