@@ -256,6 +256,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
 
       {/* Personalized Recommendations - Enhanced Visual Design */}
       <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 shadow-sm border border-indigo-100">
+      {/* <div className="bg-gradient-to-r from-yellow-50 to-gray-50 rounded-xl p-6 shadow-sm border border-indigo-100"> */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center">
             <svg className="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -437,7 +438,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex items-center space-x-3">
                     {/* School Logo Placeholder */}
-                    <div className="w-[45px] h-[45px] bg-gray-200 rounded-lg flex items-center justify-center">
+                    <div className="w-[45px] h-[45px] bg-gray-200 rounded-full flex items-center justify-center">
                       <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
@@ -461,7 +462,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                         cy="20"
                         r={radius}
                         fill="transparent"
-                        stroke="#6fa68a"
+                        stroke="green"
                         strokeWidth="3.5"
                         strokeDasharray={circumference}
                         strokeDashoffset={dashOffset}
@@ -483,7 +484,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                        className="bg-pink-300 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${matchStats.academic}%` }}
                       ></div>
                     </div>
@@ -497,7 +498,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                        className="bg-blue-300 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${matchStats.extracurricular}%` }}
                       ></div>
                     </div>
@@ -511,7 +512,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                        className="bg-purple-300 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${matchStats.specialTalents}%` }}
                       ></div>
                     </div>

@@ -30,6 +30,19 @@ const getPriorityColor = (priority: string) => {
   }
 };
 
+const getPriorityOrder = (priority: string) => {
+  switch (priority) {
+    case 'high':
+      return 1;
+    case 'medium':
+      return 2;
+    case 'low':
+      return 3;
+    default:
+      return 4;
+  }
+};
+
 const Recommendations: React.FC<RecommendationProps> = ({ recommendations = [], onToggleAction }) => {
   if (!recommendations || recommendations.length === 0) {
     return (
@@ -40,9 +53,14 @@ const Recommendations: React.FC<RecommendationProps> = ({ recommendations = [], 
     );
   }
 
+  // Sort recommendations by priority: high, medium, low
+  const sortedRecommendations = [...recommendations].sort((a, b) => {
+    return getPriorityOrder(a.priority) - getPriorityOrder(b.priority);
+  });
+
   return (
     <div className="space-y-2">
-      {recommendations.map((recommendation) => (
+      {sortedRecommendations.map((recommendation) => (
         <div key={recommendation.id} className="py-2 flex items-start">
           <div className="text-blue-600 mr-2 mt-1">•</div>
           <div className="flex-grow">
