@@ -415,7 +415,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
           </button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-3">
           {student.dreamSchools.map((school, index) => {
             const matchStats = calculateMatchPercentages(school);
             
@@ -525,8 +525,155 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
       {/* Modals */}
       {/* Profile Edit Modal */}
       <Modal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} title="Edit Student Profile">
-        <div className="space-y-4">
-          <p className="text-gray-600">Edit student profile information including personal details, interests, and study preferences.</p>
+        <div className="space-y-6">
+          {/* Basic Information */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <input
+                type="text"
+                defaultValue={student.firstName}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <input
+                type="text"
+                defaultValue={student.lastName}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Grade</label>
+            <select
+              defaultValue={student.grade}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="9">9th Grade</option>
+              <option value="10">10th Grade</option>
+              <option value="11">11th Grade</option>
+              <option value="12">12th Grade</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">School Name</label>
+            <input
+              type="text"
+              defaultValue={student.currentSchool}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">School Type</label>
+            <select
+              defaultValue={student.schoolType}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Public">Public</option>
+              <option value="Private">Private</option>
+              <option value="Charter">Charter</option>
+              <option value="Magnet">Magnet</option>
+              <option value="International">International</option>
+            </select>
+          </div>
+
+          {/* Interests */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Interests</label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {student.interests.map((interest, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                >
+                  {interest}
+                  <button
+                    type="button"
+                    className="ml-2 text-blue-600 hover:text-blue-800"
+                    onClick={() => {
+                      // TODO: Remove interest logic
+                      console.log('Remove interest:', interest);
+                    }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Add new interest"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                onClick={() => {
+                  // TODO: Add interest logic
+                  console.log('Add interest');
+                }}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
+          {/* Study Style */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Study Style</label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {student.studyStylePreference?.map((style, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
+                >
+                  {style}
+                  <button
+                    type="button"
+                    className="ml-2 text-green-600 hover:text-green-800"
+                    onClick={() => {
+                      // TODO: Remove study style logic
+                      console.log('Remove study style:', style);
+                    }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <select className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Select study style</option>
+                <option value="Visual">Visual</option>
+                <option value="Auditory">Auditory</option>
+                <option value="Kinesthetic">Kinesthetic</option>
+                <option value="Reading/Writing">Reading/Writing</option>
+                <option value="Group Study">Group Study</option>
+                <option value="Individual Study">Individual Study</option>
+              </select>
+              <button
+                type="button"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                onClick={() => {
+                  // TODO: Add study style logic
+                  console.log('Add study style');
+                }}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
           <div className="flex justify-end gap-3">
             <button
               onClick={() => setIsProfileModalOpen(false)}
@@ -550,8 +697,114 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
 
       {/* Academic Stats Edit Modal */}
       <Modal isOpen={isAcademicModalOpen} onClose={() => setIsAcademicModalOpen(false)} title="Edit Academic Stats">
-        <div className="space-y-4">
-          <p className="text-gray-600">Edit academic statistics including GPA, test scores, and planned tests.</p>
+        <div className="space-y-6">
+          {/* GPA Section */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
+            <h3 className="text-sm font-medium text-gray-600 mb-4">GPA</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Regular GPA</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="4.0"
+                  defaultValue={student.stats.gpa}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Weighted GPA</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="4.0"
+                  defaultValue={student.stats.weightedGpa}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Test Preparation Section */}
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
+            <h3 className="text-sm font-medium text-gray-600 mb-4">Test Preparation</h3>
+            
+            {/* Planned Tests */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Planned Tests</label>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {student.plannedTests?.map((test, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-purple-700"
+                  >
+                    {test}
+                    <button
+                      type="button"
+                      className="ml-2 text-purple-600 hover:text-purple-800"
+                      onClick={() => {
+                        // TODO: Remove test logic
+                        console.log('Remove test:', test);
+                      }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <select className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select test</option>
+                  <option value="SAT">SAT</option>
+                  <option value="ACT">ACT</option>
+                  <option value="PSAT">PSAT</option>
+                  <option value="AP Exams">AP Exams</option>
+                  <option value="Subject Tests">Subject Tests</option>
+                </select>
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                  onClick={() => {
+                    // TODO: Add test logic
+                    console.log('Add test');
+                  }}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* PSAT Score */}
+            {student.stats.psat && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">PSAT Score</label>
+                  <input
+                    type="number"
+                    min="320"
+                    max="1520"
+                    defaultValue={student.stats.psat.score}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">PSAT Percentile</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="99"
+                    defaultValue={student.stats.psat.percentile}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end gap-3">
             <button
               onClick={() => setIsAcademicModalOpen(false)}
@@ -575,8 +828,51 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
 
       {/* Recommendations Edit Modal */}
       <Modal isOpen={isRecommendationsModalOpen} onClose={() => setIsRecommendationsModalOpen(false)} title="Edit Recommendations">
-        <div className="space-y-4">
-          <p className="text-gray-600">Manage personalized recommendations and their priority levels.</p>
+        <div className="space-y-6">
+          <p className="text-gray-600">Check off completed recommendation actions:</p>
+          
+          {(student?.recommendations || []).map((recommendation, recIndex) => (
+            <div key={recommendation.id} className="bg-gray-50 p-4 rounded-lg">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="font-medium text-gray-900">{recommendation.title}</h3>
+                  <p className="text-sm text-gray-600">{recommendation.description}</p>
+                </div>
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  recommendation.priority === 'high' ? 'bg-red-100 text-red-800' :
+                  recommendation.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-green-100 text-green-800'
+                }`}>
+                  {recommendation.priority.charAt(0).toUpperCase() + recommendation.priority.slice(1)} Priority
+                </span>
+              </div>
+              
+              {recommendation.actions && (
+                <div className="space-y-2">
+                  {recommendation.actions.map((action, actionIndex) => (
+                    <div key={actionIndex} className="flex items-start">
+                      <input
+                        type="checkbox"
+                        checked={action.completed}
+                        onChange={() => {
+                          if (onUpdate && student) {
+                            const updatedRecommendations = [...(student.recommendations || [])];
+                            updatedRecommendations[recIndex].actions![actionIndex].completed = !action.completed;
+                            onUpdate({ recommendations: updatedRecommendations });
+                          }
+                        }}
+                        className="mt-1 mr-3 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className={`text-sm ${action.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                        {action.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
           <div className="flex justify-end gap-3">
             <button
               onClick={() => setIsRecommendationsModalOpen(false)}
@@ -600,8 +896,55 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
 
       {/* Target Schools Edit Modal */}
       <Modal isOpen={isTargetSchoolsModalOpen} onClose={() => setIsTargetSchoolsModalOpen(false)} title="Edit Target Schools">
-        <div className="space-y-4">
+        <div className="space-y-6">
           <p className="text-gray-600">Add, edit, or remove target schools and their match criteria.</p>
+          
+          {/* Current Target Schools */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Current Target Schools</h3>
+            <div className="space-y-2">
+              {student.dreamSchools.map((school, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium">{school.name}</span>
+                  <button
+                    type="button"
+                    className="text-red-600 hover:text-red-800"
+                    onClick={() => {
+                      // TODO: Remove school logic
+                      console.log('Remove school:', school.name);
+                    }}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Add New School */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Add New School</h3>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Enter school name"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                onClick={() => {
+                  // TODO: Add school logic
+                  console.log('Add school');
+                }}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
           <div className="flex justify-end gap-3">
             <button
               onClick={() => setIsTargetSchoolsModalOpen(false)}
