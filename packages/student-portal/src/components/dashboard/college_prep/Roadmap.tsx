@@ -344,10 +344,10 @@ const Roadmap: React.FC<RoadmapProps> = ({ student, onUpdate }) => {
                         )}
                       </div>
                     </div>
-                    <p className="text-gray-600 mb-3">{task.target}</p>
+                    {/* <p className="text-gray-600 mb-3">{task.target}</p> */}
                     <div className="space-y-2">
                       {task.tasks.map((subtask, taskIdx) => (
-                        <div key={taskIdx} className="flex items-start">
+                        <div key={taskIdx} className="flex items-start mt-3">
                           <input
                             type="checkbox"
                             checked={subtask.completed}
@@ -385,10 +385,10 @@ const Roadmap: React.FC<RoadmapProps> = ({ student, onUpdate }) => {
               <h2 className="text-lg font-semibold">Timeline 时间线</h2>
               <div className="flex items-center space-x-2">
                 {/* View Mode Toggle */}
-                <div className="flex bg-gray-100 rounded-lg p-1">
+                <div className="flex bg-gray-100 rounded-full p-1">
                   <button
                     onClick={() => setTimelineViewMode('timeline')}
-                    className={`p-2 rounded transition-colors ${
+                    className={`p-2 rounded-full transition-colors ${
                       timelineViewMode === 'timeline' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
                     }`}
                     title="Timeline View"
@@ -399,7 +399,7 @@ const Roadmap: React.FC<RoadmapProps> = ({ student, onUpdate }) => {
                   </button>
                   <button
                     onClick={() => setTimelineViewMode('calendar')}
-                    className={`p-2 rounded transition-colors ${
+                    className={`p-2 rounded-full transition-colors ${
                       timelineViewMode === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
                     }`}
                     title="Calendar View"

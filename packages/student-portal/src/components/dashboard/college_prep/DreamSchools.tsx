@@ -108,7 +108,7 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedSchools, setExpandedSchools] = useState<Set<string>>(new Set());
-  const [timelineViewMode, setTimelineViewMode] = useState<'row' | 'grid' | 'calendar'>('grid');
+  const [timelineViewMode, setTimelineViewMode] = useState<'row' | 'grid' | 'calendar'>('row');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isTargetSchoolsModalOpen, setIsTargetSchoolsModalOpen] = useState(false);
   const [selectedDayEvents, setSelectedDayEvents] = useState<any[]>([]);
@@ -335,7 +335,7 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
             </svg>
           </button>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {student.targetSchools.length > 0 ? (
             student.targetSchools.map((school, idx) => {
               const matchStats = calculateMatchPercentages(school);
@@ -348,7 +348,15 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
               return (
                 <div key={`${school}-${idx}`} className="bg-gray-50 p-6 rounded-lg">
                   <div className="flex items-start justify-between mb-6">
-                    <h3 className="font-medium text-lg">{school}</h3>
+                    <div className="flex items-center space-x-3">
+                      {/* School Logo Placeholder */}
+                      <div className="w-[40px] h-[40px] bg-gray-200 rounded-full flex items-center justify-center">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      </div>
+                      <h3 className="font-medium text-lg">{school}</h3>
+                    </div>
                     <div className="relative h-14 w-14">
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 40 40">
                         {/* Background circle */}
@@ -467,7 +475,15 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-bold text-2xl text-blue-800">{school.name || "Unknown School"}</h3>
+                          <div className="flex items-center space-x-3 mb-3">
+                            {/* School Logo Placeholder */}
+                            <div className="w-[45px] h-[45px] bg-gray-200 rounded-full flex items-center justify-center">
+                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                            </div>
+                            <h3 className="font-bold text-2xl text-blue-800">{school.name || "Unknown School"}</h3>
+                          </div>
                           <div className="text-sm text-gray-600 flex items-center space-x-2 mt-1">
                             <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{school.type || "N/A"}</span>
                             {school.ranking && <span>•</span>}
@@ -736,10 +752,10 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
           <h2 className="text-lg font-semibold">Application Timeline 申请时间线</h2>
           <div className="flex items-center space-x-2">
             {/* View Mode Toggle */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex bg-gray-100 rounded-full p-1">
               <button
                 onClick={() => setTimelineViewMode('row')}
-                className={`p-2 rounded transition-colors ${
+                className={`p-2 rounded-full transition-colors ${
                   timelineViewMode === 'row' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
                 }`}
                 title="Row View"
@@ -750,7 +766,7 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
               </button>
               <button
                 onClick={() => setTimelineViewMode('grid')}
-                className={`p-2 rounded transition-colors ${
+                className={`p-2 rounded-full transition-colors ${
                   timelineViewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
                 }`}
                 title="Grid View"
@@ -761,7 +777,7 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
               </button>
               <button
                 onClick={() => setTimelineViewMode('calendar')}
-                className={`p-2 rounded transition-colors ${
+                className={`p-2 rounded-full transition-colors ${
                   timelineViewMode === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
                 }`}
                 title="Calendar View"
