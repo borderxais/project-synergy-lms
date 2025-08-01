@@ -70,6 +70,12 @@ const MOCK_COURSES: Course[] = [
     name: 'Advanced Fencing Techniques',
     instructor: 'Coach Smith',
     progress: 65,
+    type: 'athletics',
+    grade: {
+      percentage: 92,
+      letter: 'A-'
+    },
+    room: 'AFT 1300',
     nextAssignment: {
       title: 'Footwork Analysis Video',
       dueDate: '2025-04-10',
@@ -80,6 +86,12 @@ const MOCK_COURSES: Course[] = [
     name: 'College English 101',
     instructor: 'Prof. Johnson',
     progress: 42,
+    type: 'english',
+    grade: {
+      percentage: 88,
+      letter: 'B+'
+    },
+    room: 'ENG 210',
     nextAssignment: {
       title: 'Essay: Modern Literature',
       dueDate: '2025-04-08',
@@ -90,6 +102,12 @@ const MOCK_COURSES: Course[] = [
     name: 'AP Calculus',
     instructor: 'Ms. Garcia',
     progress: 78,
+    type: 'math',
+    grade: {
+      percentage: 95,
+      letter: 'A'
+    },
+    room: 'MATH 101',
     nextAssignment: {
       title: 'Problem Set 7',
       dueDate: '2025-04-07',
@@ -100,6 +118,12 @@ const MOCK_COURSES: Course[] = [
     name: 'World History',
     instructor: 'Dr. Lee',
     progress: 91,
+    type: 'history',
+    grade: {
+      percentage: 89,
+      letter: 'B+'
+    },
+    room: 'HIST 202',
     nextAssignment: {
       title: 'Research Project',
       dueDate: '2025-04-15',
