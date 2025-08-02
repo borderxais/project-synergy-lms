@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Student } from '../../../types/student';
 import { Course } from '../../../types/dashboard';
 import CurrentCourses from '../home/CurrentCourses';
@@ -16,10 +16,16 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isAcademicModalOpen, setIsAcademicModalOpen] = useState(false);
-  const [isRecommendationsModalOpen, setIsRecommendationsModalOpen] = useState(false);
   const [isTargetSchoolsModalOpen, setIsTargetSchoolsModalOpen] = useState(false);
   const [customTypeColors, setCustomTypeColors] = useState<Record<string, string | null>>({});
   const [localCourses, setLocalCourses] = useState<Course[]>(courses);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [newInterest, setNewInterest] = useState('');
+  const [newStudyStyle, setNewStudyStyle] = useState('');
+  const [newTest, setNewTest] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   // Update local courses when prop changes
   React.useEffect(() => {
@@ -95,15 +101,51 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
               {/* Profile Header */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
-                  <div className="h-16 w-16 rounded-full bg-blue-600 flex items-center justify-center">
-                    <span className="text-white text-2xl font-semibold">
-                      {student.firstName?.[0]?.toUpperCase() || ''}
-                      {student.lastName?.[0]?.toUpperCase() || ''}
-                    </span>
+                  <div className="relative">
+                    <div className="h-16 w-16 rounded-full bg-blue-600 flex items-center justify-center overflow-hidden">
+                      {profileImage ? (
+                        <img 
+                          src={profileImage} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-2xl font-semibold">
+                          {student.firstName?.[0]?.toUpperCase() || ''}
+                          {student.lastName?.[0]?.toUpperCase() || ''}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full p-1 hover:bg-blue-700 transition-colors"
+                      title="Change profile picture"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (e) => {
+                            setProfileImage(e.target?.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">
-                      {student.firstName} {student.lastName}
+                      {student.firstName} {" "} {student.lastName}
                     </h3>
                     <p className="text-blue-600 font-medium">{student.grade}th Grade</p>
                   </div>
@@ -262,26 +304,6 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
             <span>Personalized Recommendations</span>
             <span className="ml-2 text-gray-500 text-base">个性化建议</span>
           </h2>
-          <button
-            onClick={() => setIsRecommendationsModalOpen(true)}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110"
-            title="Edit Recommendations"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-              />
-            </svg>
-          </button>
         </div>
         
         <Recommendation 
@@ -525,12 +547,13 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
       {/* Modals */}
       {/* Profile Edit Modal */}
       <Modal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} title="Edit Student Profile">
-        <div className="space-y-6">
+        <form id="profile-form" className="space-y-6">
           {/* Basic Information */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
               <input
+                name="firstName"
                 type="text"
                 defaultValue={student.firstName}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -539,6 +562,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
               <input
+                name="lastName"
                 type="text"
                 defaultValue={student.lastName}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -549,6 +573,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Grade</label>
             <select
+              name="grade"
               defaultValue={student.grade}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
@@ -562,6 +587,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">School Name</label>
             <input
+              name="currentSchool"
               type="text"
               defaultValue={student.currentSchool}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -571,6 +597,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">School Type</label>
             <select
+              name="schoolType"
               defaultValue={student.schoolType}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
@@ -596,8 +623,10 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                     type="button"
                     className="ml-2 text-blue-600 hover:text-blue-800"
                     onClick={() => {
-                      // TODO: Remove interest logic
-                      console.log('Remove interest:', interest);
+                      if (onUpdate && student) {
+                        const updatedInterests = student.interests.filter((_, i) => i !== index);
+                        onUpdate({ interests: updatedInterests });
+                      }
                     }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -611,14 +640,19 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
               <input
                 type="text"
                 placeholder="Add new interest"
+                value={newInterest}
+                onChange={(e) => setNewInterest(e.target.value)}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 type="button"
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 onClick={() => {
-                  // TODO: Add interest logic
-                  console.log('Add interest');
+                  if (onUpdate && student && newInterest.trim()) {
+                    const updatedInterests = [...student.interests, newInterest.trim()];
+                    onUpdate({ interests: updatedInterests });
+                    setNewInterest('');
+                  }
                 }}
               >
                 Add
@@ -640,8 +674,10 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                     type="button"
                     className="ml-2 text-green-600 hover:text-green-800"
                     onClick={() => {
-                      // TODO: Remove study style logic
-                      console.log('Remove study style:', style);
+                      if (onUpdate && student && student.studyStylePreference) {
+                        const updatedStudyStyles = student.studyStylePreference.filter((_, i) => i !== index);
+                        onUpdate({ studyStylePreference: updatedStudyStyles });
+                      }
                     }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -652,7 +688,11 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
               ))}
             </div>
             <div className="flex gap-2">
-              <select className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select 
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newStudyStyle}
+                onChange={(e) => setNewStudyStyle(e.target.value)}
+              >
                 <option value="">Select study style</option>
                 <option value="Visual">Visual</option>
                 <option value="Auditory">Auditory</option>
@@ -665,8 +705,11 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                 type="button"
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                 onClick={() => {
-                  // TODO: Add study style logic
-                  console.log('Add study style');
+                  if (onUpdate && student && newStudyStyle && student.studyStylePreference) {
+                    const updatedStudyStyles = [...student.studyStylePreference, newStudyStyle];
+                    onUpdate({ studyStylePreference: updatedStudyStyles });
+                    setNewStudyStyle('');
+                  }
                 }}
               >
                 Add
@@ -683,8 +726,17 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
             </button>
             <button
               onClick={() => {
-                // TODO: Implement profile update logic
-                console.log('Profile updated');
+                // Get form values and update student data
+                const formData = new FormData(document.querySelector('#profile-form') as HTMLFormElement);
+                const updates: Partial<Student> = {
+                  firstName: formData.get('firstName') as string,
+                  lastName: formData.get('lastName') as string,
+                  grade: parseInt(formData.get('grade') as string),
+                  currentSchool: formData.get('currentSchool') as string,
+                  schoolType: formData.get('schoolType') as string,
+                };
+                
+                onUpdate?.(updates);
                 setIsProfileModalOpen(false);
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
@@ -692,12 +744,12 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
               Save Changes
             </button>
           </div>
-        </div>
+        </form>
       </Modal>
 
       {/* Academic Stats Edit Modal */}
       <Modal isOpen={isAcademicModalOpen} onClose={() => setIsAcademicModalOpen(false)} title="Edit Academic Stats">
-        <div className="space-y-6">
+        <form id="academic-form" className="space-y-6">
           {/* GPA Section */}
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
             <h3 className="text-sm font-medium text-gray-600 mb-4">GPA</h3>
@@ -705,6 +757,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Regular GPA</label>
                 <input
+                  name="gpa"
                   type="number"
                   step="0.01"
                   min="0"
@@ -716,6 +769,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Weighted GPA</label>
                 <input
+                  name="weightedGpa"
                   type="number"
                   step="0.01"
                   min="0"
@@ -745,8 +799,10 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                       type="button"
                       className="ml-2 text-purple-600 hover:text-purple-800"
                       onClick={() => {
-                        // TODO: Remove test logic
-                        console.log('Remove test:', test);
+                        if (onUpdate && student && student.plannedTests) {
+                          const updatedTests = student.plannedTests.filter((_, i) => i !== index);
+                          onUpdate({ plannedTests: updatedTests });
+                        }
                       }}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -757,22 +813,29 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                 ))}
               </div>
               <div className="flex gap-2">
-                <select className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="">Select test</option>
-                  <option value="SAT">SAT</option>
-                  <option value="ACT">ACT</option>
-                  <option value="PSAT">PSAT</option>
-                  <option value="AP Exams">AP Exams</option>
-                  <option value="Subject Tests">Subject Tests</option>
-                </select>
-                <button
-                  type="button"
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-                  onClick={() => {
-                    // TODO: Add test logic
-                    console.log('Add test');
-                  }}
-                >
+                              <select 
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newTest}
+                onChange={(e) => setNewTest(e.target.value)}
+              >
+                <option value="">Select test</option>
+                <option value="SAT">SAT</option>
+                <option value="ACT">ACT</option>
+                <option value="PSAT">PSAT</option>
+                <option value="AP Exams">AP Exams</option>
+                <option value="Subject Tests">Subject Tests</option>
+              </select>
+              <button
+                type="button"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                onClick={() => {
+                  if (onUpdate && student && newTest && student.plannedTests) {
+                    const updatedTests = [...student.plannedTests, newTest];
+                    onUpdate({ plannedTests: updatedTests });
+                    setNewTest('');
+                  }
+                }}
+              >
                   Add
                 </button>
               </div>
@@ -784,6 +847,7 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">PSAT Score</label>
                   <input
+                    name="psatScore"
                     type="number"
                     min="320"
                     max="1520"
@@ -823,95 +887,147 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
               Save Changes
             </button>
           </div>
-        </div>
+        </form>
       </Modal>
 
-      {/* Recommendations Edit Modal */}
-      <Modal isOpen={isRecommendationsModalOpen} onClose={() => setIsRecommendationsModalOpen(false)} title="Edit Recommendations">
-        <div className="space-y-6">
-          <p className="text-gray-600">Check off completed recommendation actions:</p>
-          
-          {(student?.recommendations || []).map((recommendation, recIndex) => (
-            <div key={recommendation.id} className="bg-gray-50 p-4 rounded-lg">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-medium text-gray-900">{recommendation.title}</h3>
-                  <p className="text-sm text-gray-600">{recommendation.description}</p>
-                </div>
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  recommendation.priority === 'high' ? 'bg-red-100 text-red-800' :
-                  recommendation.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-green-100 text-green-800'
-                }`}>
-                  {recommendation.priority.charAt(0).toUpperCase() + recommendation.priority.slice(1)} Priority
-                </span>
-              </div>
-              
-              {recommendation.actions && (
-                <div className="space-y-2">
-                  {recommendation.actions.map((action, actionIndex) => (
-                    <div key={actionIndex} className="flex items-start">
-                      <input
-                        type="checkbox"
-                        checked={action.completed}
-                        onChange={() => {
-                          if (onUpdate && student) {
-                            const updatedRecommendations = [...(student.recommendations || [])];
-                            updatedRecommendations[recIndex].actions![actionIndex].completed = !action.completed;
-                            onUpdate({ recommendations: updatedRecommendations });
-                          }
-                        }}
-                        className="mt-1 mr-3 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className={`text-sm ${action.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                        {action.text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
 
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={() => setIsRecommendationsModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                // TODO: Implement recommendations update logic
-                console.log('Recommendations updated');
-                setIsRecommendationsModalOpen(false);
-              }}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
-            >
-              Save Changes
-            </button>
-          </div>
-        </div>
-      </Modal>
 
       {/* Target Schools Edit Modal */}
       <Modal isOpen={isTargetSchoolsModalOpen} onClose={() => setIsTargetSchoolsModalOpen(false)} title="Edit Target Schools">
         <div className="space-y-6">
-          <p className="text-gray-600">Add, edit, or remove target schools and their match criteria.</p>
+          <p className="text-gray-600">Add, edit, or remove target schools.</p>
           
+          {/* Search and Filter */}
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Search schools..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <select 
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">All Categories</option>
+                {SCHOOL_CATEGORIES.map(category => (
+                  <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* School Categories */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">School Categories</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {SCHOOL_CATEGORIES.map((category) => (
+                <div
+                  key={category.id}
+                  className="cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <h4 className="font-medium text-gray-900">{category.name}</h4>
+                  <p className="text-sm text-gray-500">{category.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Available Schools */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Available Schools</h3>
+            <div className="max-h-60 overflow-y-auto space-y-2">
+              {SCHOOL_DATABASE
+                .filter(school => {
+                  const matchesSearch = school.name.toLowerCase().includes(searchQuery.toLowerCase());
+                  const matchesCategory = !selectedCategory || school.category === selectedCategory;
+                  return matchesSearch && matchesCategory;
+                })
+                .map((school, index) => (
+                <div
+                  key={index}
+                  className={`flex items-center justify-between p-3 rounded-lg border ${
+                    student.dreamSchools.some(s => s.name === school.name)
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">{school.name}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        school.type === 'reach' ? 'bg-red-100 text-red-800' :
+                        school.type === 'target' ? 'bg-green-100 text-green-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {school.type.charAt(0).toUpperCase() + school.type.slice(1)}
+                      </span>
+                      <span className="text-xs text-gray-500">{SCHOOL_CATEGORIES.find(c => c.id === school.category)?.name}</span>
+                    </div>
+                  </div>
+                                     <button
+                     type="button"
+                     className={`px-3 py-1 rounded-md text-sm font-medium ${
+                       student.dreamSchools.some(s => s.name === school.name)
+                         ? 'bg-red-600 text-white hover:bg-red-700'
+                         : 'bg-blue-600 text-white hover:bg-blue-700'
+                     }`}
+                     onClick={() => {
+                       if (onUpdate && student) {
+                         const isSelected = student.dreamSchools.some(s => s.name === school.name);
+                         let updatedSchools;
+                         
+                         if (isSelected) {
+                           // Remove school
+                           updatedSchools = student.dreamSchools.filter(s => s.name !== school.name);
+                         } else {
+                           // Add school with default stats
+                           const newSchool = {
+                             name: school.name,
+                             overallMatch: 75, // Default match percentage
+                             stats: {
+                               academic: 80,
+                               extracurricular: 70,
+                               specialTalents: 75
+                             }
+                           };
+                           updatedSchools = [...student.dreamSchools, newSchool];
+                         }
+                         
+                         onUpdate({ dreamSchools: updatedSchools });
+                       }
+                     }}
+                   >
+                     {student.dreamSchools.some(s => s.name === school.name) ? 'Remove' : 'Add'}
+                   </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Current Target Schools */}
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">Current Target Schools</h3>
             <div className="space-y-2">
               {student.dreamSchools.map((school, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">{school.name}</span>
+                  <div>
+                    <span className="font-medium">{school.name}</span>
+                    <span className="ml-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                      {school.overallMatch}% Match
+                    </span>
+                  </div>
                   <button
                     type="button"
                     className="text-red-600 hover:text-red-800"
                     onClick={() => {
-                      // TODO: Remove school logic
-                      console.log('Remove school:', school.name);
+                      if (onUpdate && student) {
+                        const updatedSchools = student.dreamSchools.filter(s => s.name !== school.name);
+                        onUpdate({ dreamSchools: updatedSchools });
+                      }
                     }}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -920,28 +1036,6 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
                   </button>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Add New School */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Add New School</h3>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Enter school name"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="button"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                onClick={() => {
-                  // TODO: Add school logic
-                  console.log('Add school');
-                }}
-              >
-                Add
-              </button>
             </div>
           </div>
 
@@ -954,7 +1048,6 @@ const StudentOverview: React.FC<StudentOverviewProps> = ({ student, courses = []
             </button>
             <button
               onClick={() => {
-                // TODO: Implement target schools update logic
                 console.log('Target schools updated');
                 setIsTargetSchoolsModalOpen(false);
               }}
@@ -1039,5 +1132,79 @@ const CircularProgress: React.FC<{ progress: number }> = ({ progress }) => {
     </div>
   );
 };
+
+// Comprehensive school database
+const SCHOOL_DATABASE = [
+  // Ivy League
+  { name: 'Harvard University', type: 'reach', category: 'ivy' },
+  { name: 'Yale University', type: 'reach', category: 'ivy' },
+  { name: 'Princeton University', type: 'reach', category: 'ivy' },
+  { name: 'Columbia University', type: 'reach', category: 'ivy' },
+  { name: 'Brown University', type: 'reach', category: 'ivy' },
+  { name: 'Dartmouth College', type: 'reach', category: 'ivy' },
+  { name: 'Cornell University', type: 'reach', category: 'ivy' },
+  { name: 'University of Pennsylvania', type: 'reach', category: 'ivy' },
+  
+  // Top 10 Universities
+  { name: 'Stanford University', type: 'reach', category: 'top10' },
+  { name: 'Massachusetts Institute of Technology', type: 'reach', category: 'top10' },
+  { name: 'California Institute of Technology', type: 'reach', category: 'top10' },
+  { name: 'University of Chicago', type: 'reach', category: 'top10' },
+  { name: 'Johns Hopkins University', type: 'reach', category: 'top10' },
+  { name: 'Northwestern University', type: 'reach', category: 'top10' },
+  { name: 'Duke University', type: 'reach', category: 'top10' },
+  { name: 'Vanderbilt University', type: 'reach', category: 'top10' },
+  
+  // Top 30 Universities
+  { name: 'University of California, Berkeley', type: 'target', category: 'top30' },
+  { name: 'University of California, Los Angeles', type: 'target', category: 'top30' },
+  { name: 'University of Michigan', type: 'target', category: 'top30' },
+  { name: 'University of Virginia', type: 'target', category: 'top30' },
+  { name: 'University of North Carolina at Chapel Hill', type: 'target', category: 'top30' },
+  { name: 'University of Southern California', type: 'target', category: 'top30' },
+  { name: 'New York University', type: 'target', category: 'top30' },
+  { name: 'Carnegie Mellon University', type: 'target', category: 'top30' },
+  { name: 'Georgetown University', type: 'target', category: 'top30' },
+  { name: 'University of California, San Diego', type: 'target', category: 'top30' },
+  
+  // Public Universities
+  { name: 'University of Texas at Austin', type: 'target', category: 'public' },
+  { name: 'University of Wisconsin-Madison', type: 'target', category: 'public' },
+  { name: 'University of Illinois at Urbana-Champaign', type: 'target', category: 'public' },
+  { name: 'University of Washington', type: 'target', category: 'public' },
+  { name: 'University of Florida', type: 'safety', category: 'public' },
+  { name: 'University of Georgia', type: 'safety', category: 'public' },
+  { name: 'University of Maryland', type: 'target', category: 'public' },
+  { name: 'University of Minnesota', type: 'target', category: 'public' },
+  
+  // UC System
+  { name: 'University of California, Davis', type: 'target', category: 'uc' },
+  { name: 'University of California, Irvine', type: 'target', category: 'uc' },
+  { name: 'University of California, Santa Barbara', type: 'target', category: 'uc' },
+  { name: 'University of California, Santa Cruz', type: 'safety', category: 'uc' },
+  { name: 'University of California, Riverside', type: 'safety', category: 'uc' },
+  { name: 'University of California, Merced', type: 'safety', category: 'uc' },
+  
+  // Liberal Arts Colleges
+  { name: 'Williams College', type: 'reach', category: 'liberal' },
+  { name: 'Amherst College', type: 'reach', category: 'liberal' },
+  { name: 'Swarthmore College', type: 'reach', category: 'liberal' },
+  { name: 'Pomona College', type: 'reach', category: 'liberal' },
+  { name: 'Wellesley College', type: 'reach', category: 'liberal' },
+  { name: 'Bowdoin College', type: 'reach', category: 'liberal' },
+  { name: 'Carleton College', type: 'target', category: 'liberal' },
+  { name: 'Middlebury College', type: 'target', category: 'liberal' },
+  { name: 'Claremont McKenna College', type: 'target', category: 'liberal' },
+  { name: 'Davidson College', type: 'target', category: 'liberal' },
+];
+
+const SCHOOL_CATEGORIES = [
+  { id: 'ivy', name: 'Ivy League', description: 'The eight Ivy League institutions' },
+  { id: 'top10', name: 'Top 10 Universities', description: 'Highest ranked universities in the US' },
+  { id: 'top30', name: 'Top 30 Universities', description: 'Highly ranked universities in the US' },
+  { id: 'public', name: 'Public Universities', description: 'Major public universities' },
+  { id: 'uc', name: 'UC System', description: 'University of California system' },
+  { id: 'liberal', name: 'Liberal Arts Colleges', description: 'Top liberal arts colleges' },
+];
 
 export default StudentOverview;

@@ -4,6 +4,80 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@privschool-lms/common/lib/firebase';
 import Modal from '../../common/Modal';
 
+// Comprehensive school database
+const SCHOOL_DATABASE = [
+  // Ivy League
+  { name: 'Harvard University', type: 'reach', category: 'ivy' },
+  { name: 'Yale University', type: 'reach', category: 'ivy' },
+  { name: 'Princeton University', type: 'reach', category: 'ivy' },
+  { name: 'Columbia University', type: 'reach', category: 'ivy' },
+  { name: 'Brown University', type: 'reach', category: 'ivy' },
+  { name: 'Dartmouth College', type: 'reach', category: 'ivy' },
+  { name: 'Cornell University', type: 'reach', category: 'ivy' },
+  { name: 'University of Pennsylvania', type: 'reach', category: 'ivy' },
+  
+  // Top 10 Universities
+  { name: 'Stanford University', type: 'reach', category: 'top10' },
+  { name: 'Massachusetts Institute of Technology', type: 'reach', category: 'top10' },
+  { name: 'California Institute of Technology', type: 'reach', category: 'top10' },
+  { name: 'University of Chicago', type: 'reach', category: 'top10' },
+  { name: 'Johns Hopkins University', type: 'reach', category: 'top10' },
+  { name: 'Northwestern University', type: 'reach', category: 'top10' },
+  { name: 'Duke University', type: 'reach', category: 'top10' },
+  { name: 'Vanderbilt University', type: 'reach', category: 'top10' },
+  
+  // Top 30 Universities
+  { name: 'University of California, Berkeley', type: 'target', category: 'top30' },
+  { name: 'University of California, Los Angeles', type: 'target', category: 'top30' },
+  { name: 'University of Michigan', type: 'target', category: 'top30' },
+  { name: 'University of Virginia', type: 'target', category: 'top30' },
+  { name: 'University of North Carolina at Chapel Hill', type: 'target', category: 'top30' },
+  { name: 'University of Southern California', type: 'target', category: 'top30' },
+  { name: 'New York University', type: 'target', category: 'top30' },
+  { name: 'Carnegie Mellon University', type: 'target', category: 'top30' },
+  { name: 'Georgetown University', type: 'target', category: 'top30' },
+  { name: 'University of California, San Diego', type: 'target', category: 'top30' },
+  
+  // Public Universities
+  { name: 'University of Texas at Austin', type: 'target', category: 'public' },
+  { name: 'University of Wisconsin-Madison', type: 'target', category: 'public' },
+  { name: 'University of Illinois at Urbana-Champaign', type: 'target', category: 'public' },
+  { name: 'University of Washington', type: 'target', category: 'public' },
+  { name: 'University of Florida', type: 'safety', category: 'public' },
+  { name: 'University of Georgia', type: 'safety', category: 'public' },
+  { name: 'University of Maryland', type: 'target', category: 'public' },
+  { name: 'University of Minnesota', type: 'target', category: 'public' },
+  
+  // UC System
+  { name: 'University of California, Davis', type: 'target', category: 'uc' },
+  { name: 'University of California, Irvine', type: 'target', category: 'uc' },
+  { name: 'University of California, Santa Barbara', type: 'target', category: 'uc' },
+  { name: 'University of California, Santa Cruz', type: 'safety', category: 'uc' },
+  { name: 'University of California, Riverside', type: 'safety', category: 'uc' },
+  { name: 'University of California, Merced', type: 'safety', category: 'uc' },
+  
+  // Liberal Arts Colleges
+  { name: 'Williams College', type: 'reach', category: 'liberal' },
+  { name: 'Amherst College', type: 'reach', category: 'liberal' },
+  { name: 'Swarthmore College', type: 'reach', category: 'liberal' },
+  { name: 'Pomona College', type: 'reach', category: 'liberal' },
+  { name: 'Wellesley College', type: 'reach', category: 'liberal' },
+  { name: 'Bowdoin College', type: 'reach', category: 'liberal' },
+  { name: 'Carleton College', type: 'target', category: 'liberal' },
+  { name: 'Middlebury College', type: 'target', category: 'liberal' },
+  { name: 'Claremont McKenna College', type: 'target', category: 'liberal' },
+  { name: 'Davidson College', type: 'target', category: 'liberal' },
+];
+
+const SCHOOL_CATEGORIES = [
+  { id: 'ivy', name: 'Ivy League', description: 'The eight Ivy League institutions' },
+  { id: 'top10', name: 'Top 10 Universities', description: 'Highest ranked universities in the US' },
+  { id: 'top30', name: 'Top 30 Universities', description: 'Highly ranked universities in the US' },
+  { id: 'public', name: 'Public Universities', description: 'Major public universities' },
+  { id: 'uc', name: 'UC System', description: 'University of California system' },
+  { id: 'liberal', name: 'Liberal Arts Colleges', description: 'Top liberal arts colleges' },
+];
+
 interface DreamSchoolsProps {
   student?: Student | null;
   onUpdate?: (updates: Partial<Student>) => void;
@@ -111,6 +185,8 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
   const [timelineViewMode, setTimelineViewMode] = useState<'row' | 'grid' | 'calendar'>('row');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isTargetSchoolsModalOpen, setIsTargetSchoolsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedDayEvents, setSelectedDayEvents] = useState<any[]>([]);
   const [isDayEventsModalOpen, setIsDayEventsModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -521,7 +597,7 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
 
                     {/* Expanded Content */}
                     {expandedSchools.has(school.name) && (
-                      <div className="px-6 pb-6">
+                      <div className="px-6 pb-6 pt-3">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           {/* Key Statistics Column */}
                           <div className="space-y-4">
@@ -937,21 +1013,130 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
       {/* Target Schools Edit Modal */}
       <Modal isOpen={isTargetSchoolsModalOpen} onClose={() => setIsTargetSchoolsModalOpen(false)} title="Edit Target Schools">
         <div className="space-y-6">
-          <p className="text-gray-600">Add, edit, or remove target schools and their match criteria.</p>
+          <p className="text-gray-600">Add, edit, or remove target schools.</p>
           
+          {/* Search and Filter */}
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Search schools..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <select 
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">All Categories</option>
+                {SCHOOL_CATEGORIES.map(category => (
+                  <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* School Categories */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">School Categories</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {SCHOOL_CATEGORIES.map((category) => (
+                <div
+                  key={category.id}
+                  className="cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <h4 className="font-medium text-gray-900">{category.name}</h4>
+                  <p className="text-sm text-gray-500">{category.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Available Schools */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Available Schools</h3>
+            <div className="max-h-60 overflow-y-auto space-y-2">
+              {SCHOOL_DATABASE
+                .filter(school => {
+                  const matchesSearch = school.name.toLowerCase().includes(searchQuery.toLowerCase());
+                  const matchesCategory = !selectedCategory || school.category === selectedCategory;
+                  return matchesSearch && matchesCategory;
+                })
+                .map((school, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between p-3 rounded-lg border ${
+                      student.targetSchools.includes(school.name)
+                        ? 'bg-blue-50 border-blue-200'
+                        : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">{school.name}</div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          school.type === 'reach' ? 'bg-red-100 text-red-800' :
+                          school.type === 'target' ? 'bg-green-100 text-green-800' :
+                          'bg-blue-100 text-blue-800'
+                        }`}>
+                          {school.type.charAt(0).toUpperCase() + school.type.slice(1)}
+                        </span>
+                        <span className="text-xs text-gray-500">{SCHOOL_CATEGORIES.find(c => c.id === school.category)?.name}</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${
+                        student.targetSchools.includes(school.name)
+                          ? 'bg-red-600 text-white hover:bg-red-700'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                      onClick={() => {
+                        if (onUpdate && student) {
+                          const isSelected = student.targetSchools.includes(school.name);
+                          let updatedSchools;
+                          
+                          if (isSelected) {
+                            // Remove school
+                            updatedSchools = student.targetSchools.filter(s => s !== school.name);
+                          } else {
+                            // Add school
+                            updatedSchools = [...student.targetSchools, school.name];
+                          }
+                          
+                          onUpdate({ targetSchools: updatedSchools });
+                        }
+                      }}
+                    >
+                      {student.targetSchools.includes(school.name) ? 'Remove' : 'Add'}
+                    </button>
+                  </div>
+                ))}
+            </div>
+          </div>
+
           {/* Current Target Schools */}
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">Current Target Schools</h3>
             <div className="space-y-2">
               {student.targetSchools.map((school, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">{school}</span>
+                  <div>
+                    <span className="font-medium">{school}</span>
+                    <span className="ml-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                      Target School
+                    </span>
+                  </div>
                   <button
                     type="button"
                     className="text-red-600 hover:text-red-800"
                     onClick={() => {
-                      // TODO: Remove school logic
-                      console.log('Remove school:', school);
+                      if (onUpdate && student) {
+                        const updatedSchools = student.targetSchools.filter(s => s !== school);
+                        onUpdate({ targetSchools: updatedSchools });
+                      }
                     }}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -960,28 +1145,6 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
                   </button>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Add New School */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Add New School</h3>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Enter school name"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="button"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                onClick={() => {
-                  // TODO: Add school logic
-                  console.log('Add school');
-                }}
-              >
-                Add
-              </button>
             </div>
           </div>
 
@@ -994,7 +1157,6 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
             </button>
             <button
               onClick={() => {
-                // TODO: Implement target schools update logic
                 console.log('Target schools updated');
                 setIsTargetSchoolsModalOpen(false);
               }}
