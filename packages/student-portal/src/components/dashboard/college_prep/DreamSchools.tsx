@@ -2,6 +2,81 @@ import React, { useEffect, useState } from 'react';
 import { Student } from '../../../types/student';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@privschool-lms/common/lib/firebase';
+import Modal from '../../common/Modal';
+
+// Comprehensive school database
+const SCHOOL_DATABASE = [
+  // Ivy League
+  { name: 'Harvard University', type: 'reach', category: 'ivy' },
+  { name: 'Yale University', type: 'reach', category: 'ivy' },
+  { name: 'Princeton University', type: 'reach', category: 'ivy' },
+  { name: 'Columbia University', type: 'reach', category: 'ivy' },
+  { name: 'Brown University', type: 'reach', category: 'ivy' },
+  { name: 'Dartmouth College', type: 'reach', category: 'ivy' },
+  { name: 'Cornell University', type: 'reach', category: 'ivy' },
+  { name: 'University of Pennsylvania', type: 'reach', category: 'ivy' },
+  
+  // Top 10 Universities
+  { name: 'Stanford University', type: 'reach', category: 'top10' },
+  { name: 'Massachusetts Institute of Technology', type: 'reach', category: 'top10' },
+  { name: 'California Institute of Technology', type: 'reach', category: 'top10' },
+  { name: 'University of Chicago', type: 'reach', category: 'top10' },
+  { name: 'Johns Hopkins University', type: 'reach', category: 'top10' },
+  { name: 'Northwestern University', type: 'reach', category: 'top10' },
+  { name: 'Duke University', type: 'reach', category: 'top10' },
+  { name: 'Vanderbilt University', type: 'reach', category: 'top10' },
+  
+  // Top 30 Universities
+  { name: 'University of California, Berkeley', type: 'target', category: 'top30' },
+  { name: 'University of California, Los Angeles', type: 'target', category: 'top30' },
+  { name: 'University of Michigan', type: 'target', category: 'top30' },
+  { name: 'University of Virginia', type: 'target', category: 'top30' },
+  { name: 'University of North Carolina at Chapel Hill', type: 'target', category: 'top30' },
+  { name: 'University of Southern California', type: 'target', category: 'top30' },
+  { name: 'New York University', type: 'target', category: 'top30' },
+  { name: 'Carnegie Mellon University', type: 'target', category: 'top30' },
+  { name: 'Georgetown University', type: 'target', category: 'top30' },
+  { name: 'University of California, San Diego', type: 'target', category: 'top30' },
+  
+  // Public Universities
+  { name: 'University of Texas at Austin', type: 'target', category: 'public' },
+  { name: 'University of Wisconsin-Madison', type: 'target', category: 'public' },
+  { name: 'University of Illinois at Urbana-Champaign', type: 'target', category: 'public' },
+  { name: 'University of Washington', type: 'target', category: 'public' },
+  { name: 'University of Florida', type: 'safety', category: 'public' },
+  { name: 'University of Georgia', type: 'safety', category: 'public' },
+  { name: 'University of Maryland', type: 'target', category: 'public' },
+  { name: 'University of Minnesota', type: 'target', category: 'public' },
+  
+  // UC System
+  { name: 'University of California, Davis', type: 'target', category: 'uc' },
+  { name: 'University of California, Irvine', type: 'target', category: 'uc' },
+  { name: 'University of California, Santa Barbara', type: 'target', category: 'uc' },
+  { name: 'University of California, Santa Cruz', type: 'safety', category: 'uc' },
+  { name: 'University of California, Riverside', type: 'safety', category: 'uc' },
+  { name: 'University of California, Merced', type: 'safety', category: 'uc' },
+  
+  // Liberal Arts Colleges
+  { name: 'Williams College', type: 'reach', category: 'liberal' },
+  { name: 'Amherst College', type: 'reach', category: 'liberal' },
+  { name: 'Swarthmore College', type: 'reach', category: 'liberal' },
+  { name: 'Pomona College', type: 'reach', category: 'liberal' },
+  { name: 'Wellesley College', type: 'reach', category: 'liberal' },
+  { name: 'Bowdoin College', type: 'reach', category: 'liberal' },
+  { name: 'Carleton College', type: 'target', category: 'liberal' },
+  { name: 'Middlebury College', type: 'target', category: 'liberal' },
+  { name: 'Claremont McKenna College', type: 'target', category: 'liberal' },
+  { name: 'Davidson College', type: 'target', category: 'liberal' },
+];
+
+const SCHOOL_CATEGORIES = [
+  { id: 'ivy', name: 'Ivy League', description: 'The eight Ivy League institutions' },
+  { id: 'top10', name: 'Top 10 Universities', description: 'Highest ranked universities in the US' },
+  { id: 'top30', name: 'Top 30 Universities', description: 'Highly ranked universities in the US' },
+  { id: 'public', name: 'Public Universities', description: 'Major public universities' },
+  { id: 'uc', name: 'UC System', description: 'University of California system' },
+  { id: 'liberal', name: 'Liberal Arts Colleges', description: 'Top liberal arts colleges' },
+];
 
 interface DreamSchoolsProps {
   student?: Student | null;
@@ -85,11 +160,43 @@ interface SchoolStatistics {
   webURL?: string;
 }
 
+// Calendar helper functions
+const getDaysInMonth = (year: number, month: number) => {
+  return new Date(year, month + 1, 0).getDate();
+};
+
+const getFirstDayOfMonth = (year: number, month: number) => {
+  return new Date(year, month, 1).getDay();
+};
+
+const getMonthName = (month: number) => {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  return months[month];
+};
 
 const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
   const [schoolStats, setSchoolStats] = useState<SchoolStatistics[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedSchools, setExpandedSchools] = useState<Set<string>>(new Set());
+  const [timelineViewMode, setTimelineViewMode] = useState<'row' | 'grid' | 'calendar'>('row');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isTargetSchoolsModalOpen, setIsTargetSchoolsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedDayEvents, setSelectedDayEvents] = useState<any[]>([]);
+  const [isDayEventsModalOpen, setIsDayEventsModalOpen] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+
+  // Initialize all schools as expanded by default
+  useEffect(() => {
+    if (schoolStats.length > 0) {
+      setExpandedSchools(new Set(schoolStats.map(school => school.name)));
+    }
+  }, [schoolStats]);
 
   // Fetch school statistics from Firestore
   useEffect(() => {
@@ -167,6 +274,93 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
     fetchSchoolStatistics();
   }, [student?.targetSchools]);
 
+  const toggleSchoolExpansion = (schoolName: string) => {
+    const newExpandedSchools = new Set(expandedSchools);
+    if (newExpandedSchools.has(schoolName)) {
+      newExpandedSchools.delete(schoolName);
+    } else {
+      newExpandedSchools.add(schoolName);
+    }
+    setExpandedSchools(newExpandedSchools);
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      if (direction === 'prev') {
+        newDate.setMonth(newDate.getMonth() - 1);
+      } else {
+        newDate.setMonth(newDate.getMonth() + 1);
+      }
+      return newDate;
+    });
+  };
+
+  const renderCalendar = (deadlines: any[]) => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = getDaysInMonth(year, month);
+    const firstDayOfMonth = getFirstDayOfMonth(year, month);
+    const today = new Date();
+    
+    const calendarDays = [];
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      calendarDays.push(<div key={`empty-${i}`} className="h-28 bg-gray-50"></div>);
+    }
+    
+    // Add cells for each day of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const currentDate = new Date(year, month, day);
+      const isToday = today.getDate() === day && 
+                     today.getMonth() === month && 
+                     today.getFullYear() === year;
+      
+      const dayDeadlines = deadlines.filter(deadline => {
+        const deadlineDate = new Date(deadline.date);
+        return deadlineDate.getDate() === day && 
+               deadlineDate.getMonth() === month && 
+               deadlineDate.getFullYear() === year;
+      });
+      
+      const showMoreButton = dayDeadlines.length > 2;
+      const displayEvents = showMoreButton ? dayDeadlines.slice(0, 2) : dayDeadlines;
+      
+      calendarDays.push(
+        <div 
+          key={day} 
+          className={`h-28 border border-gray-200 p-3 relative ${
+            isToday ? 'bg-blue-50 border-blue-300' : ''
+          }`}
+        >
+          <div className={`text-sm mb-2 ${isToday ? 'text-blue-600 font-semibold' : 'text-gray-600'}`}>
+            {day}
+          </div>
+          {displayEvents.map((deadline, idx) => (
+            <div key={idx} className="text-xs bg-blue-100 text-blue-800 px-1 rounded mb-1 truncate">
+              {deadline.type}
+            </div>
+          ))}
+          {showMoreButton && (
+            <button
+              onClick={() => {
+                setSelectedDayEvents(dayDeadlines);
+                setSelectedDay(currentDate);
+                setIsDayEventsModalOpen(true);
+              }}
+              className="text-xs text-blue-600 hover:text-blue-800 mt-1 w-full text-left"
+            >
+              +{dayDeadlines.length - 2} more
+            </button>
+          )}
+        </div>
+      );
+    }
+    
+    return calendarDays;
+  };
+
   if (!student) {
     return (
       <div className="text-center py-8">
@@ -194,7 +388,29 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
     <div className="space-y-6">
       {/* Target Schools */}
       <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Target Schools 目标学校</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Target Schools 目标学校</h2>
+          <button
+            onClick={() => setIsTargetSchoolsModalOpen(true)}
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110"
+            title="Edit Target Schools"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+              />
+            </svg>
+          </button>
+        </div>
         <div className="grid gap-6 md:grid-cols-2">
           {student.targetSchools.length > 0 ? (
             student.targetSchools.map((school, idx) => {
@@ -208,7 +424,15 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
               return (
                 <div key={`${school}-${idx}`} className="bg-gray-50 p-6 rounded-lg">
                   <div className="flex items-start justify-between mb-6">
-                    <h3 className="font-medium text-lg">{school}</h3>
+                    <div className="flex items-center space-x-3">
+                      {/* School Logo Placeholder */}
+                      <div className="w-[40px] h-[40px] bg-gray-200 rounded-full flex items-center justify-center">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      </div>
+                      <h3 className="font-medium text-lg">{school}</h3>
+                    </div>
                     <div className="relative h-14 w-14">
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 40 40">
                         {/* Background circle */}
@@ -247,10 +471,9 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className="h-2 rounded-full transition-all duration-500"
+                          className="bg-pink-300 h-2 rounded-full transition-all duration-500"
                           style={{ 
                             width: `${matchStats.academic}%`,
-                            backgroundColor: '#785d8e'
                           }}
                         ></div>
                       </div>
@@ -264,10 +487,9 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className="h-2 rounded-full transition-all duration-500"
+                          className="bg-blue-300 h-2 rounded-full transition-all duration-500"
                           style={{ 
                             width: `${matchStats.extracurricular}%`,
-                            backgroundColor: '#785d8e'
                           }}
                         ></div>
                       </div>
@@ -280,10 +502,9 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className="h-2 rounded-full transition-all duration-500"
+                          className="bg-purple-300 h-2 rounded-full transition-all duration-500"
                           style={{ 
                             width: `${matchStats.specialTalents}%`,
-                            backgroundColor: '#785d8e'
                           }}
                         ></div>
                       </div>
@@ -293,7 +514,7 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
               );
             })
           ) : (
-            <div className="col-span-2 text-center py-8">
+            <div className="col-span-3 text-center py-8">
               <p className="text-gray-500">No target schools added yet</p>
               <p className="text-sm text-gray-400 mt-2">Add schools during the onboarding process</p>
             </div>
@@ -319,221 +540,251 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
         )}
         
         {!loading && !error && schoolStats.length > 0 && (
-            <div className="space-y-10">
+            <div className="space-y-4">
                 {schoolStats.map((school, index) => (
-                <div key={`stats-${school.name}-${index}`} className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-lg shadow border border-gray-100">
+                <div key={`stats-${school.name}-${index}`} className="bg-gradient-to-r from-gray-50 to-white rounded-lg shadow border border-gray-100 overflow-hidden">
                     
-                    {/* Ensure the school name is displayed */}
-                    <h3 className="font-bold text-2xl text-blue-800 mb-2">{school.name || "Unknown School"}</h3>
-                    
-                    <div className="text-sm text-gray-600 flex items-center space-x-2">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{school.type || "N/A"}</span>
-                    {school.ranking && <span>•</span>}
-                    {school.ranking && <span className="font-medium">Ranking: {school.ranking}</span>}
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    {/* Key Statistics Column */}
-                    <div className="space-y-4">
-                        <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Key Statistics</h4>
-                        
-                        {/* Acceptance Rate - Support both formats */}
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                        <div className="text-sm text-gray-500 mb-1">Acceptance Rate</div>
-                        <div className="text-xl font-bold text-blue-700">
-                            {school["Acceptance Rate"]?.Rate 
-                                ? school["Acceptance Rate"].Rate 
-                                : (school.acceptanceRate ? `${school.acceptanceRate}` : 'N/A')}
-                        </div>
-                        {school["Acceptance Rate"]?.["Total Applicants"] && (
-                            <div className="text-xs text-gray-500 mt-1">
-                                Applicants: {school["Acceptance Rate"]["Total Applicants"]}
+                    {/* School Header - Clickable to toggle expansion */}
+                    <div 
+                      className="p-6 cursor-pointer hover:bg-blue-50 transition-colors"
+                      onClick={() => toggleSchoolExpansion(school.name)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center space-x-3 mb-3">
+                            {/* School Logo Placeholder */}
+                            <div className="w-[45px] h-[45px] bg-gray-200 rounded-full flex items-center justify-center">
+                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
                             </div>
-                        )}
+                            <h3 className="font-bold text-2xl text-blue-800">{school.name || "Unknown School"}</h3>
+                          </div>
+                          <div className="text-sm text-gray-600 flex items-center space-x-2 mt-1">
+                            <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{school.type || "N/A"}</span>
+                            {school.ranking && <span>•</span>}
+                            {school.ranking && <span className="font-medium">Ranking: {school.ranking}</span>}
+                          </div>
                         </div>
+                        <div className="flex items-center space-x-3">
+                          {/* View on College Board Button */}
+                          {school.College_Board_Admissions_URL && (
+                            <a 
+                              href={school.College_Board_Admissions_URL} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-gray-50 rounded-full transition-all duration-200"
+                              onClick={(e) => e.stopPropagation()}
+                              title="View on College Board"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          )}
+                          {/* Expand/Collapse Icon */}
+                          <svg 
+                            className={`w-6 h-6 text-gray-400 transition-transform ${expandedSchools.has(school.name) ? 'rotate-180' : ''}`}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
 
-                        {/* Average GPA - Support both formats */}
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                        <div className="text-sm text-gray-500 mb-1">Average GPA</div>
-                        <div className="text-xl font-bold text-blue-700">
-                            {school.GPA ? (
-                                <div className="space-y-1">
+                    {/* Expanded Content */}
+                    {expandedSchools.has(school.name) && (
+                      <div className="px-6 pb-6 pt-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* Key Statistics Column */}
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Key Statistics</h4>
+                            
+                            {/* Acceptance Rate - Support both formats */}
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                              <div className="text-sm text-gray-500 mb-1">Acceptance Rate</div>
+                              <div className="text-xl font-bold text-blue-700">
+                                {school["Acceptance Rate"]?.Rate 
+                                  ? school["Acceptance Rate"].Rate 
+                                  : (school.acceptanceRate ? `${school.acceptanceRate}` : 'N/A')}
+                              </div>
+                              {school["Acceptance Rate"]?.["Total Applicants"] && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Applicants: {school["Acceptance Rate"]["Total Applicants"]}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Average GPA - Support both formats */}
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                              <div className="text-sm text-gray-500 mb-1">Average GPA</div>
+                              <div className="text-xl font-bold text-blue-700">
+                                {school.GPA ? (
+                                  <div className="space-y-1">
                                     {school.GPA["3.75+"] && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">3.75+:</span>
-                                            <span className="text-lg">{school.GPA["3.75+"]}</span>
-                                        </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">3.75+:</span>
+                                        <span className="text-lg">{school.GPA["3.75+"]}</span>
+                                      </div>
                                     )}
                                     {school.GPA["3.50–3.74"] && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">3.50–3.74:</span>
-                                            <span className="text-lg">{school.GPA["3.50–3.74"]}</span>
-                                        </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">3.50–3.74:</span>
+                                        <span className="text-lg">{school.GPA["3.50–3.74"]}</span>
+                                      </div>
                                     )}
                                     {school.GPA["3.25–3.49"] && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">3.25–3.49:</span>
-                                            <span className="text-lg">{school.GPA["3.25–3.49"]}</span>
-                                        </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-600">3.25–3.49:</span>
+                                        <span className="text-lg">{school.GPA["3.25–3.49"]}</span>
+                                      </div>
                                     )}
-                                </div>
-                            ) : (
-                                school.averageGPA && typeof school.averageGPA === 'object'
-                                ? (
+                                  </div>
+                                ) : (
+                                  school.averageGPA && typeof school.averageGPA === 'object'
+                                  ? (
                                     <div>
-                                        <div className="flex justify-between items-center">
+                                      <div className="flex justify-between items-center">
                                         <span className="text-sm text-gray-600">Weighted:</span>
                                         <span className="text-lg">{parseFloat(school.averageGPA.weighted).toFixed(1)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
+                                      </div>
+                                      <div className="flex justify-between items-center">
                                         <span className="text-sm text-gray-600">Unweighted:</span>
                                         <span className="text-lg">{parseFloat(school.averageGPA.unweighted).toFixed(1)}</span>
-                                        </div>
+                                      </div>
                                     </div>
                                     )
-                                : 'N/A'
-                            )}
-                        </div>
-                        </div>
-                    </div>
+                                  : 'N/A'
+                                )}
+                              </div>
+                            </div>
+                          </div>
 
-                    {/* Test Scores Column */}
-                    <div className="space-y-4">
-                        <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Test Scores</h4>
+                          {/* Test Scores Column */}
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Test Scores</h4>
 
-                        {/* SAT Score - Support both formats */}
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="text-sm text-gray-500 mb-1">SAT</div>
-                            {school.SAT ? (
-                                <div className="space-y-1">
-                                    {school.SAT.Total && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Total:</span>
-                                            <span className="text-lg font-bold text-blue-700">{school.SAT.Total}</span>
-                                        </div>
-                                    )}
-                                    {school.SAT.Math && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Math:</span>
-                                            <span className="text-lg">{school.SAT.Math}</span>
-                                        </div>
-                                    )}
-                                    {school.SAT.Reading && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Reading:</span>
-                                            <span className="text-lg">{school.SAT.Reading}</span>
-                                        </div>
-                                    )}
-                                    {school.SAT.required && (
-                                        <div className="text-xs text-gray-500 mt-1">Required: {school.SAT.required}</div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="text-xl font-bold text-blue-700">{school.averageSAT || 'N/A'}</div>
-                            )}
-                        </div>
-
-                        {/* ACT Score - Support both formats */}
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="text-sm text-gray-500 mb-1">ACT</div>
-                            {typeof school.ACT === 'object' && school.ACT ? (
-                                <div>
-                                    <div className="text-xl font-bold text-blue-700">{school.ACT.avg_score || 'N/A'}</div>
-                                    {school.ACT.required && <div className="text-xs text-gray-500 mt-1">Required: {school.ACT.required}</div>}
-                                </div>
-                            ) : (
-                                <div className="text-xl font-bold text-blue-700">{typeof school.ACT === 'string' ? school.ACT : (school.averageACT || 'N/A')}</div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Additional Information Column */}
-                    <div className="space-y-4">
-                        <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Deadlines & Requirements</h4>
-                        
-                        {/* Deadlines - Support both formats */}
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="text-sm text-gray-500 mb-1">Application Deadlines</div>
-                            {school.Deadlines ? (
-                                <div className="space-y-1">
-                                    {school.Deadlines.Regular && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Regular:</span>
-                                            <span className="text-lg">{school.Deadlines.Regular}</span>
-                                        </div>
-                                    )}
-                                    {school.Deadlines["Early Action"] && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Early Action:</span>
-                                            <span className="text-lg">{school.Deadlines["Early Action"]}</span>
-                                        </div>
-                                    )}
-                                    {school.Deadlines["Early Decision"] && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Early Decision:</span>
-                                            <span className="text-lg">{school.Deadlines["Early Decision"]}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="text-lg font-medium text-gray-700">Not available</div>
-                            )}
-                        </div>
-                        
-                        {/* Application Requirements */}
-                        {school["Application Requirements"] && (
+                            {/* SAT Score - Support both formats */}
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                              <div className="text-sm text-gray-500 mb-1">SAT</div>
+                              {school.SAT ? (
+                                <div className="space-y-1">
+                                  {school.SAT.Total && (
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">Total:</span>
+                                      <span className="text-lg font-bold text-blue-700">{school.SAT.Total}</span>
+                                    </div>
+                                  )}
+                                  {school.SAT.Math && (
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">Math:</span>
+                                      <span className="text-lg">{school.SAT.Math}</span>
+                                    </div>
+                                  )}
+                                  {school.SAT.Reading && (
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">Reading:</span>
+                                      <span className="text-lg">{school.SAT.Reading}</span>
+                                    </div>
+                                  )}
+                                  {school.SAT.required && (
+                                    <div className="text-xs text-gray-500 mt-1">Required: {school.SAT.required}</div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="text-xl font-bold text-blue-700">{school.averageSAT || 'N/A'}</div>
+                              )}
+                            </div>
+
+                            {/* ACT Score - Support both formats */}
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                              <div className="text-sm text-gray-500 mb-1">ACT</div>
+                              {typeof school.ACT === 'object' && school.ACT ? (
+                                <div>
+                                  <div className="text-xl font-bold text-blue-700">{school.ACT.avg_score || 'N/A'}</div>
+                                  {school.ACT.required && <div className="text-xs text-gray-500 mt-1">Required: {school.ACT.required}</div>}
+                                </div>
+                              ) : (
+                                <div className="text-xl font-bold text-blue-700">{typeof school.ACT === 'string' ? school.ACT : (school.averageACT || 'N/A')}</div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Additional Information Column */}
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-gray-700 border-b pb-1 mb-3">Deadlines & Requirements</h4>
+                            
+                            {/* Deadlines - Support both formats */}
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                              <div className="text-sm text-gray-500 mb-1">Application Deadlines</div>
+                              {school.Deadlines ? (
+                                <div className="space-y-1">
+                                  {school.Deadlines.Regular && (
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">Regular:</span>
+                                      <span className="text-lg">{school.Deadlines.Regular}</span>
+                                    </div>
+                                  )}
+                                  {school.Deadlines["Early Action"] && (
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">Early Action:</span>
+                                      <span className="text-lg">{school.Deadlines["Early Action"]}</span>
+                                    </div>
+                                  )}
+                                  {school.Deadlines["Early Decision"] && (
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">Early Decision:</span>
+                                      <span className="text-lg">{school.Deadlines["Early Decision"]}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="text-lg font-medium text-gray-700">Not available</div>
+                              )}
+                            </div>
+                            
+                            {/* Application Requirements */}
+                            {school["Application Requirements"] && (
+                              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                                 <div className="text-sm text-gray-500 mb-1">Requirements</div>
                                 <div className="space-y-1">
-                                    {school["Application Requirements"]["College Prep Courses"] && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">College Prep:</span>
-                                            <span className="text-sm">{school["Application Requirements"]["College Prep Courses"]}</span>
-                                        </div>
-                                    )}
-                                    {school["Application Requirements"]["High School GPA"] && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">GPA:</span>
-                                            <span className="text-sm">{school["Application Requirements"]["High School GPA"]}</span>
-                                        </div>
-                                    )}
-                                    {school["Application Requirements"]["SAT/ACT Scores"] && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-600">Test Scores:</span>
-                                            <span className="text-sm">{school["Application Requirements"]["SAT/ACT Scores"]}</span>
-                                        </div>
-                                    )}
+                                  {school["Application Requirements"]["College Prep Courses"] && (
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">College Prep:</span>
+                                      <span className="text-sm">{school["Application Requirements"]["College Prep Courses"]}</span>
+                                    </div>
+                                  )}
+                                  {school["Application Requirements"]["High School GPA"] && (
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">GPA:</span>
+                                      <span className="text-sm">{school["Application Requirements"]["High School GPA"]}</span>
+                                    </div>
+                                  )}
+                                  {school["Application Requirements"]["SAT/ACT Scores"] && (
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">Test Scores:</span>
+                                      <span className="text-sm">{school["Application Requirements"]["SAT/ACT Scores"]}</span>
+                                    </div>
+                                  )}
                                 </div>
-                            </div>
-                        )}
-                        
-                        {/* College Board URL */}
-                        {school.College_Board_Admissions_URL && (
-                            <div className="mt-2">
-                                <a 
-                                    href={school.College_Board_Admissions_URL} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
-                                >
-                                    <span>View on College Board</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                    </svg>
-                                </a>
-                            </div>
-                        )}
-                    </div>
-                    </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
-                    {/* Official Website */}
-                    {school.webURL && (
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mt-4">
-                        <div className="text-sm text-blue-700 mb-1 font-medium">Official Website</div>
-                        <a href={`https://${school.webURL}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-lg flex items-center">
-                        <span>{school.webURL}</span>
-                        </a>
-                    </div>
+                        {/* Official Website */}
+                        {school.webURL && (
+                          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mt-4">
+                            <div className="text-sm text-blue-700 mb-1 font-medium">Official Website</div>
+                            <a href={`https://${school.webURL}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-lg flex items-center">
+                              <span>{school.webURL}</span>
+                            </a>
+                          </div>
+                        )}
+                      </div>
                     )}
                 </div>
                 ))}
@@ -573,52 +824,172 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
 
       {/* Application Timeline */}
       <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Application Timeline 申请时间线</h2>
-        <div className="space-y-4">
-          {(() => {
-            type DeadlineInfo = {
-              type: string;
-              date: Date;
-            };
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Application Timeline 申请时间线</h2>
+          <div className="flex items-center space-x-2">
+            {/* View Mode Toggle */}
+            <div className="flex bg-gray-100 rounded-full p-1">
+              <button
+                onClick={() => setTimelineViewMode('row')}
+                className={`p-2 rounded-full transition-colors ${
+                  timelineViewMode === 'row' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+                }`}
+                title="Row View"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setTimelineViewMode('grid')}
+                className={`p-2 rounded-full transition-colors ${
+                  timelineViewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+                }`}
+                title="Grid View"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setTimelineViewMode('calendar')}
+                className={`p-2 rounded-full transition-colors ${
+                  timelineViewMode === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
+                }`}
+                title="Calendar View"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {(() => {
+          type DeadlineInfo = {
+            type: string;
+            date: Date;
+            school: string;
+          };
 
-            const convertDeadlineToDate = (dateStr: string | undefined): Date | null => {
-              if (!dateStr) return null;
-              const [monthStr, dayStr] = dateStr.split(' ');
-              const currentYear = new Date().getFullYear();
-              try {
-                const dateObj = new Date(`${monthStr} ${dayStr}, ${currentYear}`);
-                if (isNaN(dateObj.getTime())) return null;
-                if (dateObj < new Date()) {
-                  dateObj.setFullYear(currentYear + 1);
-                }
-                return dateObj;
-              } catch {
-                return null;
+          const convertDeadlineToDate = (dateStr: string | undefined): Date | null => {
+            if (!dateStr) return null;
+            const [monthStr, dayStr] = dateStr.split(' ');
+            const currentYear = new Date().getFullYear();
+            try {
+              const dateObj = new Date(`${monthStr} ${dayStr}, ${currentYear}`);
+              if (isNaN(dateObj.getTime())) return null;
+              if (dateObj < new Date()) {
+                dateObj.setFullYear(currentYear + 1);
               }
-            };
+              return dateObj;
+            } catch {
+              return null;
+            }
+          };
 
-            const timelineItems = schoolStats.map((schoolStat) => {
-              if (!schoolStat.Deadlines) return null;
+          const timelineItems = schoolStats.map((schoolStat) => {
+            if (!schoolStat.Deadlines) return null;
 
-              // Convert deadlines to date objects and sort them
-              const deadlines: DeadlineInfo[] = [
-                { type: 'Regular', date: convertDeadlineToDate(schoolStat.Deadlines.Regular) },
-                { type: 'Early Action', date: convertDeadlineToDate(schoolStat.Deadlines['Early Action']) },
-                { type: 'Early Decision', date: convertDeadlineToDate(schoolStat.Deadlines['Early Decision']) }
-              ]
-                .filter((d): d is DeadlineInfo => d.date !== null)
-                .sort((a, b) => a.date.getTime() - b.date.getTime());
+            // Convert deadlines to date objects and sort them
+            const deadlines: DeadlineInfo[] = [
+              { type: 'Regular', date: convertDeadlineToDate(schoolStat.Deadlines.Regular), school: schoolStat.name },
+              { type: 'Early Action', date: convertDeadlineToDate(schoolStat.Deadlines['Early Action']), school: schoolStat.name },
+              { type: 'Early Decision', date: convertDeadlineToDate(schoolStat.Deadlines['Early Decision']), school: schoolStat.name }
+            ]
+              .filter((d): d is DeadlineInfo => d.date !== null)
+              .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-              if (deadlines.length === 0) return null;
+            if (deadlines.length === 0) return null;
 
-              return (
-                <div key={`timeline-${schoolStat.name}`} className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="font-medium mb-3">{schoolStat.name}</h3>
+            return { school: schoolStat.name, deadlines };
+          }).filter(Boolean);
+
+          const allDeadlines = timelineItems.flatMap(item => item!.deadlines);
+
+          if (timelineViewMode === 'calendar') {
+            return (
+              <div className="space-y-4">
+                {/* Calendar Navigation */}
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => navigateMonth('prev')}
+                    className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}
+                  </h3>
+                  <button
+                    onClick={() => navigateMonth('next')}
+                    className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Calendar Grid */}
+                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                  {/* Calendar Header */}
+                  <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                      <div key={day} className="p-3 text-center text-sm font-medium text-gray-600">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Calendar Days */}
+                  <div className="grid grid-cols-7">
+                    {renderCalendar(allDeadlines)}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (timelineViewMode === 'grid') {
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {timelineItems.map((item, idx) => (
+                  <div key={`grid-${idx}`} className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="font-medium mb-3">{item!.school}</h3>
+                    <div className="space-y-2">
+                      {item!.deadlines.map((deadline, deadlineIdx) => (
+                        <div key={`${deadline.type}-${deadlineIdx}`} className="flex items-center justify-between p-2 bg-white rounded">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{deadline.type}</div>
+                            <div className="text-xs text-gray-500">{deadline.date.toLocaleDateString()}</div>
+                          </div>
+                          <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                            {deadline.date.toLocaleDateString()}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          }
+
+          // Row view (default)
+          return (
+            <div className="space-y-4">
+              {timelineItems.map((item, idx) => (
+                <div key={`row-${idx}`} className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium mb-3">{item!.school}</h3>
                   <div className="relative">
                     <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200"></div>
                     <div className="space-y-4 ml-6">
-                      {deadlines.map((deadline, idx) => (
-                        <div key={`${deadline.type}-${idx}`} className="relative">
+                      {item!.deadlines.map((deadline, deadlineIdx) => (
+                        <div key={`${deadline.type}-${deadlineIdx}`} className="relative">
                           <div className="absolute -left-[1.625rem] top-2 w-3 h-3 rounded-full bg-blue-500"></div>
                           <div>
                             <div className="text-xs text-gray-500 mb-1">
@@ -633,21 +1004,185 @@ const DreamSchools: React.FC<DreamSchoolsProps> = ({ student, onUpdate }) => {
                     </div>
                   </div>
                 </div>
-              );
-            });
-
-            const hasValidDeadlines = timelineItems.some(item => item !== null);
-            
-            return hasValidDeadlines ? (
-              <>{timelineItems}</>
-            ) : (
-              <div className="text-center py-4">
-                <p className="text-gray-500">No application deadlines available</p>
-              </div>
-            );
-          })()}
-        </div>
+              ))}
+            </div>
+          );
+        })()}
       </div>
+
+      {/* Target Schools Edit Modal */}
+      <Modal isOpen={isTargetSchoolsModalOpen} onClose={() => setIsTargetSchoolsModalOpen(false)} title="Edit Target Schools">
+        <div className="space-y-6">
+          <p className="text-gray-600">Add, edit, or remove target schools.</p>
+          
+          {/* Search and Filter */}
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Search schools..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <select 
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">All Categories</option>
+                {SCHOOL_CATEGORIES.map(category => (
+                  <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* School Categories */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">School Categories</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {SCHOOL_CATEGORIES.map((category) => (
+                <div
+                  key={category.id}
+                  className="cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <h4 className="font-medium text-gray-900">{category.name}</h4>
+                  <p className="text-sm text-gray-500">{category.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Available Schools */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Available Schools</h3>
+            <div className="max-h-60 overflow-y-auto space-y-2">
+              {SCHOOL_DATABASE
+                .filter(school => {
+                  const matchesSearch = school.name.toLowerCase().includes(searchQuery.toLowerCase());
+                  const matchesCategory = !selectedCategory || school.category === selectedCategory;
+                  return matchesSearch && matchesCategory;
+                })
+                .map((school, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between p-3 rounded-lg border ${
+                      student.targetSchools.includes(school.name)
+                        ? 'bg-blue-50 border-blue-200'
+                        : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">{school.name}</div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          school.type === 'reach' ? 'bg-red-100 text-red-800' :
+                          school.type === 'target' ? 'bg-green-100 text-green-800' :
+                          'bg-blue-100 text-blue-800'
+                        }`}>
+                          {school.type.charAt(0).toUpperCase() + school.type.slice(1)}
+                        </span>
+                        <span className="text-xs text-gray-500">{SCHOOL_CATEGORIES.find(c => c.id === school.category)?.name}</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${
+                        student.targetSchools.includes(school.name)
+                          ? 'bg-red-600 text-white hover:bg-red-700'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                      onClick={() => {
+                        if (onUpdate && student) {
+                          const isSelected = student.targetSchools.includes(school.name);
+                          let updatedSchools;
+                          
+                          if (isSelected) {
+                            // Remove school
+                            updatedSchools = student.targetSchools.filter(s => s !== school.name);
+                          } else {
+                            // Add school
+                            updatedSchools = [...student.targetSchools, school.name];
+                          }
+                          
+                          onUpdate({ targetSchools: updatedSchools });
+                        }
+                      }}
+                    >
+                      {student.targetSchools.includes(school.name) ? 'Remove' : 'Add'}
+                    </button>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          {/* Current Target Schools */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Current Target Schools</h3>
+            <div className="space-y-2">
+              {student.targetSchools.map((school, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <span className="font-medium">{school}</span>
+                    <span className="ml-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                      Target School
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="text-red-600 hover:text-red-800"
+                    onClick={() => {
+                      if (onUpdate && student) {
+                        const updatedSchools = student.targetSchools.filter(s => s !== school);
+                        onUpdate({ targetSchools: updatedSchools });
+                      }
+                    }}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setIsTargetSchoolsModalOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                console.log('Target schools updated');
+                setIsTargetSchoolsModalOpen(false);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Day Events Modal */}
+      <Modal isOpen={isDayEventsModalOpen} onClose={() => setIsDayEventsModalOpen(false)} title={`Events for ${selectedDay?.toLocaleDateString()}`}>
+        <div className="space-y-4">
+          {selectedDayEvents.map((event, index) => (
+            <div key={index} className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+              <div className="text-sm font-medium text-blue-800">{event.type}</div>
+              <div className="text-xs text-blue-600">From: {new Date(event.date).toLocaleDateString()}</div>
+              <div className="text-xs text-blue-600">School: {event.school}</div>
+            </div>
+          ))}
+          {selectedDayEvents.length === 0 && (
+            <p className="text-gray-500 text-sm">No events for this day.</p>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

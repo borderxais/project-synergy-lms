@@ -87,7 +87,7 @@ const CurrentCourses: React.FC<CurrentCoursesProps> = ({ courses, onCoursesUpdat
         <h2 className="text-xl font-semibold text-gray-900">Current Courses</h2>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+          className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110"
           title="Edit Courses"
         >
           <svg

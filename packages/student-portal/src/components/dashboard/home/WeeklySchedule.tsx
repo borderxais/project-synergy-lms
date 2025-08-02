@@ -153,7 +153,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
         <h2 className="text-xl font-semibold text-gray-900">Weekly Schedule</h2>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+          className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110"
           title="Add Schedule Item"
         >
           <svg
@@ -236,7 +236,7 @@ export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
                 className={`${getColorClass(item.type, customTypeColors[item.type] || undefined)} 
                   px-2 py-1 mx-1 my-0.5 mx-auto rounded-md cursor-pointer text-sm flex flex-col items-center justify-center text-center hover:opacity-80 transition-opacity`}
                 style={{
-                  width: '160px',
+                  width: "95%",
                   gridColumn: col,
                   gridRowStart: pos.gridRowStart + 1, // +1 to offset for header row
                   gridRowEnd: pos.gridRowEnd + 1,
